@@ -74,6 +74,77 @@ colnames(WC_score) <- c("Year",
 WC_score <- subset(WC_score, Year >= 1994)
 ```
 
+On Fait avec un autre csv qui contient plus d'info
+
+```{r}
+#On importe ce csv
+WC_matches <- read.csv("WC Data/matches_1930_2022 (All).csv",
+                    header = TRUE,
+                    sep = ",",
+                    stringsAsFactors = FALSE)
+
+WC_matches <- WC_matches[c("home_team",
+                           "away_team",
+                           "home_score",
+                           "away_score",
+                           "Attendance",
+                           "Round",
+                           "Year",
+                           "home_red_card",
+                           "away_red_card",
+                           "home_yellow_card_long",
+                           "away_yellow_card_long",
+                           "home_substitute_in_long",
+                           "away_substitute_in_long")]
+
+#On renomme les colonnes
+colnames(WC_matches) <- c("Home",
+                          "Away",
+                          "Home.Goals",
+                          "Away.Goals",
+                          "Attendance",
+                          "Round",
+                          "Year",
+                          "Home.Red.Card",
+                          "Away.Red.Card",
+                          "Home.Yellow.Card",
+                          "Away.Yellow.Card",
+                          "Home.Substitute.In",
+                          "Away.Substitute.In")
+
+#On ajoute une colonne de différence de buts
+WC_matches$Goals_Diff <- WC_matches$Home.Goals - WC_matches$Away.Goals
+
+#Home Red Card Count
+WC_matches$Home.Red.Card.Count <- sapply(strsplit(WC_matches$Home.Red.Card, "\\|"), function(x) length(x))
+
+#Away Red Card Count
+WC_matches$Away.Red.Card.Count <- sapply(strsplit(WC_matches$Away.Red.Card, "\\|"), function(x) length(x))
+
+#Red card diff
+WC_matches$Red.Card.Diff <- WC_matches$Home.Red.Card.Count - WC_matches$Away.Red.Card.Count
+
+#Home Yellow Card Count
+WC_matches$Home.Yellow.Card.Count <- sapply(strsplit(WC_matches$Home.Yellow.Card, ","), function(x) length(x))
+
+#Away Yellow Card Count
+WC_matches$Away.Yellow.Card.Count <- sapply(strsplit(WC_matches$Away.Yellow.Card, ","), function(x) length(x))
+
+#Yellow card diff
+WC_matches$Yellow.Card.Diff <- WC_matches$Home.Yellow.Card.Count - WC_matches$Away.Yellow.Card.Count
+
+#Home Substitute In Count
+WC_matches$Home.Substitution.Count <- sapply(strsplit(WC_matches$Home.Substitute.In, ","), function(x) length(x))
+
+#Away Substitute In Count
+WC_matches$Away.Substitution.Count <- sapply(strsplit(WC_matches$Away.Substitute.In, ","), function(x) length(x))
+
+#Substitution diff
+WC_matches$Substitution.Diff <- WC_matches$Home.Substitution.Count - WC_matches$Away.Substitution.Count
+```
+
+
+
 ## 2.2 Traitement du classement FIFA
 
 ```{r}
