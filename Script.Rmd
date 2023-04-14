@@ -237,35 +237,43 @@ names(WC_matches_2022_22)[names(WC_matches_2022_22) == "possession.team2"] <- "a
 #On va maintenant cherche à faire une base de données avec les données de la Coupe du Monde 2022 et les données de la base de données WC_database
 
 # remplacer les valeurs manquantes dans WC_database avec les valeurs correspondantes dans WC_matches_2022_22
-WC_database$hshots[is.na(WC_database$hshots) & WC_database$Year == 2022] <-
-  WC_matches_2022_22$hshots[match(paste(WC_database$Home[is.na(WC_database$hshots) & WC_database$Year == 2022]),
-                                  paste(WC_database$Away[is.na(WC_database$hshots) & WC_database$Year == 2022]),
-                                  WC_matches_2022_22$Year)]
-WC_database$ashots[is.na(WC_database$ashots) & WC_database$Year == 2022] <-
-  WC_matches_2022_22$ashots[match(paste(WC_database$Home[is.na(WC_database$ashots) & WC_database$Year == 2022]),
-                                  paste(WC_database$Away[is.na(WC_database$ashots) & WC_database$Year == 2022]),
-                                  WC_matches_2022_22$Year)]
-WC_database$hshotsOnTarget[is.na(WC_database$hshotsOnTarget) & WC_database$Year == 2022] <-
-      WC_matches_2022_22$hshotsOnTarget[match(paste(WC_database$Home[is.na(WC_database$hshotsOnTarget) & WC_database$Year == 2022]),
-                                                paste(WC_database$Away[is.na(WC_database$hshotsOnTarget) & WC_database$Year == 2022]),
-                                                WC_matches_2022_22$Year)]
-WC_database$ashotsOnTarget[is.na(WC_database$ashotsOnTarget) & WC_database$Year == 2022] <-
-      WC_matches_2022_22$ashotsOnTarget[match(paste(WC_database$Home[is.na(WC_database$ashotsOnTarget) & WC_database$Year == 2022]),
-                                                paste(WC_database$Away[is.na(WC_database$ashotsOnTarget) & WC_database$Year == 2022]),
-                                                WC_matches_2022_22$Year)]
-WC_database$hfouls[is.na(WC_database$hfouls) & WC_database$Year == 2022] <-
-      WC_matches_2022_22$hfouls[match(paste(WC_database$Home[is.na(WC_database$hfouls) & WC_database$Year == 2022]),
-                                        paste(WC_database$Away[is.na(WC_database$hfouls) & WC_database$Year == 2022]),
-                                        WC_matches_2022_22$Year)]
-WC_database$afouls[is.na(WC_database$afouls) & WC_database$Year == 2022] <-
-      WC_matches_2022_22$afouls[match(paste(WC_database$Home[is.na(WC_database$afouls) & WC_database$Year == 2022]),
-                                        paste(WC_database$Away[is.na(WC_database$afouls) & WC_database$Year == 2022]),
-                                        WC_matches_2022_22$Year)]
-WC_database$hPossesion[is.na(WC_database$hPosession) & WC_database$Year == 2022] <-
-      WC_matches_2022_22$hPossession[match(paste(WC_database$Home[is.na(WC_database$hPossesion) & WC_database$Year == 2022]),
-                                           paste(WC_database$Home[is.na(WC_database$hPossesion) & WC_database$Year == 2022]),
-                                           WC_matches_2022_22$Year)]
+WC_database$Home <- tolower(trimws(WC_database$Home))
+WC_database$Away <- tolower(trimws(WC_database$Away))
+WC_database$Year <- as.integer(WC_database$Year)
 
+WC_matches_2022_22$Home <- tolower(trimws(WC_matches_2022_22$Home))
+WC_matches_2022_22$Away <- tolower(trimws(WC_matches_2022_22$Away))
+WC_matches_2022_22$Year <- as.integer(WC_matches_2022_22$Year)
+
+
+
+for (i in 1:nrow(WC_database)) {
+  if (is.na(WC_database$hshots[i]) && WC_database$Year[i] == 2022) {
+    home_team <- WC_database$Home[i]
+    away_team <- WC_database$Away[i]
+    year <- WC_database$Year[i]
+    matching_row <- match(paste(home_team, away_team, year),
+                          paste(WC_matches_2022_22$Home, WC_matches_2022_22$Away, WC_matches_2022_22$Year))
+    WC_database$hshots[i] <- WC_matches_2022_22$hshots[matching_row]
+    WC_database$ashots[i] <- WC_matches_2022_22$ashots[matching_row]
+    WC_database$hPossesion[i] <- WC_matches_2022_22$hPossession[matching_row]
+    WC_database$aPossesion[i] <- WC_matches_2022_22$aPossession[matching_row]
+    WC_database$hshotsOnTarget[i] <- WC_matches_2022_22$hshotsOnTarget[matching_row]
+    WC_database$ashotsOnTarget[i] <- WC_matches_2022_22$ashotsOnTarget[matching_row]
+    WC_database$hfouls[i] <- WC_matches_2022_22$hfouls[matching_row]
+    WC_database$afouls[i] <- WC_matches_2022_22$afouls[matching_row]
+    WC_database$Home.Yellow.Cards.Count[i] <- WC_matches_2022_22$Home.Yellow.Cards.Count[matching_row]
+    WC_database$Away.Yellow.Cards.Count[i] <- WC_matches_2022_22$Away.Yellow.Cards.Count[matching_row]
+    WC_database$Home.Red.Cards.Count[i] <- WC_matches_2022_22$Home.Red.Cards.Count[matching_row]
+    WC_database$Away.Red.Cards.Count[i] <- WC_matches_2022_22$Away.Red.Cards.Count[matching_row]
+    WC_database$Possession.Diff[i] <- WC_matches_2022_22$Possession.Diff[matching_row]
+    WC_database$Shots.Diff[i] <- WC_matches_2022_22$Shots.Diff[matching_row]
+    WC_database$Shots.On.Target.Diff[i] <- WC_matches_2022_22$Shots.On.Target.Diff[matching_row]
+    WC_database$Fouls.Diff[i] <- WC_matches_2022_22$Fouls.Diff[matching_row]
+    WC_database$Yellow.Cards.Diff[i] <- WC_matches_2022_22$Yellow.Cards.Diff[matching_row]
+    WC_database$Red.Cards.Diff[i] <- WC_matches_2022_22$Red.Cards.Diff[matching_row]
+  }
+}
 
 ```
 
