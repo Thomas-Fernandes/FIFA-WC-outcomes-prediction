@@ -45,36 +45,7 @@ All : https://www.kaggle.com/datasets/piterfm/fifa-football-world-cup — Petro 
 ALL2: https://www.kaggle.com/datasets/kaito510/fifa-world-cup-match-stats  — Kaito G.
       Contient les données de possession de balle, carton, tir cadrés de 2001 à 2021.
 
-## 2.1 Traitement du Score et de l'affluence
-
-```{r}
-#On importe le premier csv : "FIFA_World_Cup_1558_23 (Attendance)"
-WC_score <- read.csv("WC Data/FIFA_World_Cup_1558_23 (Attendance).csv",
-                     header = TRUE,
-                     sep = ",",
-                     stringsAsFactors = FALSE)
-
-#On supprime les colonnes inutiles
-WC_score <- WC_score[,c(2,6,7,8,9,10,12)]
-
-#Nouvelle colonne avec la différence de buts
-WC_score$Diff <- WC_score$Home.Team.Goals - WC_score$Away.Team.Goals
-
-#On renomme les colonnes
-colnames(WC_score) <- c("Year",
-                        "City",
-                        "Home",
-                        "Away",
-                        "Home.Goals",
-                        "Away.Goals",
-                        "Attendance",
-                        "Diff")
-
-#On ne garde que les scores des matchs qui ont eu lieu après 1993
-WC_score <- subset(WC_score, Year >= 1994)
-```
-
-On Fait avec un autre csv qui contient plus d'info
+## 2.1 Traitement des données de match
 
 ```{r}
 #On importe ce csv
@@ -141,11 +112,165 @@ WC_matches$Away.Substitution.Count <- sapply(strsplit(WC_matches$Away.Substitute
 
 #Substitution diff
 WC_matches$Substitution.Diff <- WC_matches$Home.Substitution.Count - WC_matches$Away.Substitution.Count
+
+#On renomme WC_matches en WC_database
+WC_database <- WC_matches
+
+#On ne garde que les données après 1994
+WC_database <- subset(WC_database, Year >= 1994)
+
+#On supprime les colonnes Home.Red.Card, Away.Red.Card, Home.Yellow.Card, Away.Yellow.Card, Home.Substitute.In, Away.Substitute.In, en utilisant leur nom
+WC_database <- WC_database[,-c(8,9,10,11,12, 13)]
+```
+
+## 2.2 Traitement des données de match supplémentaires
+
+Pour les matchs les plus récents (à partir de la cdm 2014), nous avons des données supplémentaires sur la possession de balle, le nombre de tir, de tir cadré, de fautes et d'arrêt
+
+```{r}
+WC_matches_stats <- read.csv("WC Data/FIFAallMatchBoxData (Possesion 2001-2021).csv",
+                    header = TRUE,
+                    sep = ",",
+                    stringsAsFactors = FALSE)
+
+#On ne garde que les années de coupe du monde
+WC_matches_stats <- subset(WC_matches_stats, year %in% c(2006,
+                                                         2010, 2014, 2018, 2022))
+
+#On ajoute les différences des nouvelles stats
+WC_matches_stats <- WC_matches_stats %>% 
+  mutate(Possession.Diff = hPossesion - aPossesion)
+WC_matches_stats <- WC_matches_stats %>% 
+  mutate(Shots.Diff = hshots - ashots)
+WC_matches_stats <- WC_matches_stats %>% 
+      mutate(Shots.On.Target.Diff = hshotsOnTarget - ashotsOnTarget)
+WC_matches_stats <- WC_matches_stats %>% 
+      mutate(Fouls.Diff = hfouls - afouls)
+WC_matches_stats <- WC_matches_stats %>% 
+      mutate(Saves.Diff = hsaves - asaves)
+
+# Merge des dataframes WC_matches_stats et WC_database en conservant toutes les observations de WC_database (all.x = TRUE pour ensuite ajouter les données de 2022)
+WC_database_2 <- merge(WC_database, WC_matches_stats, by.x = c("Home", "Away", "Year"), by.y = c("hname", "aname", "year"), all.x = TRUE)
+WC_database <- WC_database_2
+
+# Supprimer le dataframe temporaire
+rm(WC_database_2)
+
+
+#On enlève les colonnes qui sont doublées
+WC_database <- subset(WC_database, select = -c(hgoals,
+                                               agoals,
+                                               hyellowCards,
+                                               ayellowCards,
+                                               hredCards,
+                                               aredCards))
+```
+
+## 2.3 Traitement des données de la coupe du monde 2022
+
+Les données de la dernière coupe du monde ne sont pas incluses dans les base de données précédemment utilisé. On va donc se servir d'une nouvelle base de données et la même autre même format que WC_database pour pouvoir ensuite merge les deux.
+
+```{r}
+#On importe le csv : "WC Data/Fifa_world_cup_matches_2022 (Cards).csv"
+WC_matches_2022 <- read.csv("WC Data/Fifa_world_cup_matches_2022 (Cards).csv",
+                    header = TRUE,
+                    sep = ",",
+                    stringsAsFactors = FALSE)
+
+#On ajoute une colonne Year pour pouvoir merge avec les autres données
+WC_matches_2022$Year <- 2022
+
+#On ajoute une colonne de différence de buts
+WC_matches_2022$Goals_Diff <- WC_matches_2022$number.of.goals.team1 - WC_matches_2022$number.of.goals.team2
+
+#On ajoute une colonne de différence de cartons jaunes
+WC_matches_2022$Yellow_Card_Diff <- WC_matches_2022$yellow.cards.team1 - WC_matches_2022$yellow.cards.team2
+
+#On ajoute une colonne de différence de cartons rouges
+WC_matches_2022$Red_Card_Diff <- WC_matches_2022$red.cards.team1 - WC_matches_2022$red.cards.team2
+
+#On ajoute une colonne de différence de remplacements~
+#Il n'y en a pas dans la base de données
+
+#On ajoute une colonne de différence de possession de balle
+#Il faut d'abord supprimer le % de la colonne
+WC_matches_2022$possession.team1 <- gsub("%", "", WC_matches_2022$possession.team1)
+WC_matches_2022$possession.team2 <- gsub("%", "", WC_matches_2022$possession.team2)
+WC_matches_2022$possession.team1 <- as.numeric(WC_matches_2022$possession.team1)
+WC_matches_2022$possession.team2 <- as.numeric(WC_matches_2022$possession.team2)
+WC_matches_2022$Possession.Diff <- WC_matches_2022$possession.team1 - WC_matches_2022$possession.team2
+
+#On ajoute une colonne de différence de tir (total.attacks.team1)
+WC_matches_2022$Shots.Diff <- WC_matches_2022$total.attempts.team1 - WC_matches_2022$total.attempts.team2
+
+#On ajoute une colonne de différence de tir cadré (on.target.attempts.team1)
+WC_matches_2022$Shots.On.Target.Diff <- WC_matches_2022$on.target.attempts.team1 - WC_matches_2022$on.target.attempts.team2
+
+#Les colonnes fouls sont en "against" et non "committed by" donc on les renomme
+names(WC_matches_2022)[names(WC_matches_2022) == "fouls.against.team1"] <- "fouls.team1"
+names(WC_matches_2022)[names(WC_matches_2022) == "fouls.against.team2"] <- "fouls.team2"
+
+#On ajoute une colonne de différence de fautes
+WC_matches_2022$Fouls.Diff <- WC_matches_2022$fouls.team1 - WC_matches_2022$fouls.team2
+
+#On garde que les colonnes qui nous intéressent
+WC_matches_2022_22 <- subset(WC_matches_2022, select = c(1:7, 11, 12, 21, 22, 57:62, 89:96))
+
+#On renomme les colonnes pour qu'elles soient identiques à celles de WC_database
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "team1"] <- "Home"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "team2"] <- "Away"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "number.of.goals.team1"] <- "Home.Goals"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "number.of.goals.team2"] <- "Away.Goals"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "yellow.cards.team1"] <- "Home.Yellow.Cards.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "yellow.cards.team2"] <- "Away.Yellow.Cards.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "red.cards.team1"] <- "Home.Red.Cards.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "red.cards.team2"] <- "Away.Red.Cards.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "total.attempts.team1"] <- "hshots"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "total.attempts.team2"] <- "ashots"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "on.target.attempts.team1"] <- "hshotsOnTarget"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "on.target.attempts.team2"] <- "ashotsOnTarget"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "fouls.team1"] <- "hfouls"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "fouls.team2"] <- "afouls"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "possession.team1"] <- "hPossession"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "possession.team2"] <- "aPossession"
+
+#On va maintenant cherche à faire une base de données avec les données de la Coupe du Monde 2022 et les données de la base de données WC_database
+
+# remplacer les valeurs manquantes dans WC_database avec les valeurs correspondantes dans WC_matches_2022_22
+WC_database$hshots[is.na(WC_database$hshots) & WC_database$Year == 2022] <-
+  WC_matches_2022_22$hshots[match(paste(WC_database$Home[is.na(WC_database$hshots) & WC_database$Year == 2022]),
+                                  paste(WC_database$Away[is.na(WC_database$hshots) & WC_database$Year == 2022]),
+                                  WC_matches_2022_22$Year)]
+WC_database$ashots[is.na(WC_database$ashots) & WC_database$Year == 2022] <-
+  WC_matches_2022_22$ashots[match(paste(WC_database$Home[is.na(WC_database$ashots) & WC_database$Year == 2022]),
+                                  paste(WC_database$Away[is.na(WC_database$ashots) & WC_database$Year == 2022]),
+                                  WC_matches_2022_22$Year)]
+WC_database$hshotsOnTarget[is.na(WC_database$hshotsOnTarget) & WC_database$Year == 2022] <-
+      WC_matches_2022_22$hshotsOnTarget[match(paste(WC_database$Home[is.na(WC_database$hshotsOnTarget) & WC_database$Year == 2022]),
+                                                paste(WC_database$Away[is.na(WC_database$hshotsOnTarget) & WC_database$Year == 2022]),
+                                                WC_matches_2022_22$Year)]
+WC_database$ashotsOnTarget[is.na(WC_database$ashotsOnTarget) & WC_database$Year == 2022] <-
+      WC_matches_2022_22$ashotsOnTarget[match(paste(WC_database$Home[is.na(WC_database$ashotsOnTarget) & WC_database$Year == 2022]),
+                                                paste(WC_database$Away[is.na(WC_database$ashotsOnTarget) & WC_database$Year == 2022]),
+                                                WC_matches_2022_22$Year)]
+WC_database$hfouls[is.na(WC_database$hfouls) & WC_database$Year == 2022] <-
+      WC_matches_2022_22$hfouls[match(paste(WC_database$Home[is.na(WC_database$hfouls) & WC_database$Year == 2022]),
+                                        paste(WC_database$Away[is.na(WC_database$hfouls) & WC_database$Year == 2022]),
+                                        WC_matches_2022_22$Year)]
+WC_database$afouls[is.na(WC_database$afouls) & WC_database$Year == 2022] <-
+      WC_matches_2022_22$afouls[match(paste(WC_database$Home[is.na(WC_database$afouls) & WC_database$Year == 2022]),
+                                        paste(WC_database$Away[is.na(WC_database$afouls) & WC_database$Year == 2022]),
+                                        WC_matches_2022_22$Year)]
+WC_database$hPossesion[is.na(WC_database$hPosession) & WC_database$Year == 2022] <-
+      WC_matches_2022_22$hPossession[match(paste(WC_database$Home[is.na(WC_database$hPossesion) & WC_database$Year == 2022]),
+                                           paste(WC_database$Home[is.na(WC_database$hPossesion) & WC_database$Year == 2022]),
+                                           WC_matches_2022_22$Year)]
+
+
 ```
 
 
-
-## 2.2 Traitement du classement FIFA
+## 2.4 Traitement du classement FIFA
 
 ```{r}
 #On importe le deuxième csv : "fifa_ranking-2022-12-22 (Rank)"
@@ -154,10 +279,36 @@ FIFA_rank <- read.csv("WC Data/fifa_ranking-2022-12-22 (Rank).csv",
                     sep = ",",
                     stringsAsFactors = FALSE)
 
-#On garde que les classements au mois de mai de chaque année
+#On garde uniquement les classements datés au mois de mai de chaque année et on ajoute une nouvelle colonne pour l'année correspondante
 FIFA_rank <- subset(FIFA_rank, month(FIFA_rank$rank_date) == 5)
+FIFA_rank$rank_date <- as.Date(FIFA_rank$rank_date)
+FIFA_rank$Year <- format(FIFA_rank$rank_date, "%Y")
 
-#Maintenant on ne garde que les années de la coupe du monde
+#On ne garde que les années de la Coupe du Monde
 FIFA_rank <- subset(FIFA_rank,year(FIFA_rank$rank_date) %in% c(1994, 1998, 2002, 2006,
                                                                2010, 2014, 2018, 2022))
+
+#On renomme les entrées de "country_full" USA en "United States" pour le merge
+FIFA_rank$country_full <- gsub("USA", "United States", FIFA_rank$country_full)
+
+#On ajoute les colonnes "FIFA_Rank.Home" et "FIFA_Rank.Away" dans le dataframe "WC_database"
+WC_database$FIFA_Rank.Home <- 0
+WC_database$FIFA_Rank.Away <- 0
+
+#Fonction qui récupère le classement FIFA d'une équipe à une année donnée
+get_rank <- function(year, team){
+  rank <- FIFA_rank$rank[which(FIFA_rank$country_full == team & FIFA_rank$Year == year)]
+  if(length(rank) > 0){
+    return(rank)
+  } else {
+    return(NA)
+  }
+}
+
+#Application de la fonction pour chaque ligne du dataframe
+for(i in 1:nrow(WC_database)){
+  WC_database$FIFA_Rank.Home[i] <- get_rank(WC_database$Year[i], WC_database$Home[i])
+  WC_database$FIFA_Rank.Away[i] <- get_rank(WC_database$Year[i], WC_database$Away[i])
+}
+
 ```
