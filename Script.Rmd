@@ -137,6 +137,12 @@ WC_matches_stats <- read.csv("WC Data/FIFAallMatchBoxData (Possesion 2001-2021).
 WC_matches_stats <- subset(WC_matches_stats, year %in% c(2006,
                                                          2010, 2014, 2018, 2022))
 
+#Rename south korea as korea republic
+WC_matches_stats <- WC_matches_stats %>% 
+  mutate(hname = ifelse(hname == "South Korea", "Korea Republic", hname))
+WC_matches_stats <- WC_matches_stats %>%
+  mutate(aname = ifelse(aname == "South Korea", "Korea Republic", aname))
+
 #On ajoute les différences des nouvelles stats
 WC_matches_stats <- WC_matches_stats %>% 
   mutate(Possession.Diff = hPossesion - aPossesion)
