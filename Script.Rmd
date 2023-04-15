@@ -429,9 +429,7 @@ plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
 
 Nous pouvons observer une diminution du nombre de cartons jaunes et rouges par match au fil des années de la Coupe du Monde. Cette tendance peut être expliquée par une possible évolution dans la sévérité des arbitres, qui pourraient être de moins en moins stricts dans leur distribution de cartons, ou par une amélioration du comportement disciplinaire des joueurs, notamment depuis l'introduction de la VAR qui permet de mieux contrôler les fautes commises.
 
-# 4.Modèle
-
-## 4.1 Modèle de régression linéaire
+# 4.Modèle de régression linéaire
 
 Le modèle de regression linéaire suivant est estimé pour chaque année de la Coupe du Monde :
 
@@ -439,7 +437,7 @@ Le modèle de regression linéaire suivant est estimé pour chaque année de la 
 
 avec le match i, de l'année de coupe du monde t, et $\Delta \text{X}_t^i$ le vecteur des variables de contrôles. Le vecteur X contient, selon les années, plus ou moins de variables de contrôle en fonction des données qui disponibles. Cependant à partir de 2006, les variables de contrôle sont : La différence du nombre de carton jaune, rouge, du nombre de fautes, de possession, du nombre de tirs et de tirs cadrés. Pour certaines années, la différence du nombre d'arrêt est incluse.
 
-### 4.1.1 Estimations des modèles des modèles et tests d'hétéroscédasticité, d'autocorrelation et de multicolinéarité 
+## 4.1 Estimations des modèles des modèles
 
 On divise les différentes Coupes du Monde en deux sous ensemble : 1994, 1998 et 2002, et 2006, 2010, 2014, 2018 et 2022. La répartition permet de regroupés les modèles pour lesquels nous avons peu de variables de contrôle de ceux pour lesquels nous en avons plusieurs.
 
@@ -456,6 +454,11 @@ model_2014 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff 
 model_2018 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Saves.Diff + Attendance, data = WC_2018)
 model_2022 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Attendance, data = WC_2022)
 
+```
+
+## 4.2 Tests d'hétéroscédasticité, d'autocorrelation et de multicolinéarité
+  
+```{r}
 #On vérifie que les résidus ne sont pas héteroscedastiques avec le test de Breusch-Pagan
 bp_1994 <- bptest(model_1994)
 bp_1998 <- bptest(model_1998)
@@ -491,11 +494,10 @@ tests <- data.frame(Model = c("1994", "1998", "2002", "2006", "2010", "2014", "2
                       BP_p_value = round(c(bp_1994$p.value, bp_1998$p.value, bp_2002$p.value, bp_2006$p.value, bp_2010$p.value, bp_2014$p.value, bp_2018$p.value, bp_2022$p.value), 4),
                       DW_p_value = round(c(dw_1994, dw_1998, dw_2002, dw_2006, dw_2010, dw_2014, dw_2018, dw_2022), 4),
                       VIF_Value = round(c(vif_1994, vif_1998, vif_2002, vif_2006, vif_2010, vif_2014, vif_2018, vif_2022), 4))
-
 tests
 ```
 
-### 4.1.2 Résultats
+## 4.2 Résultats
 
 Pour ces 4 Coupes du Monde, les statistiques disponibles sont plus nombreuses.
 ```{r}
@@ -511,52 +513,19 @@ stargazer(model_2006, model_2010, model_2014, model_2018, model_2022,
           column.labels = c("2006", "2010", "2014", "2018", "2022"))
 ```
 
-## 4.2 Modèle de regression binomiale (modèle probit)
 
-A la différence du modèle MCO, le modeèle probit cherche à prédire une variable binaire. Les variables explicatives sont des variables continues mais la variable expliquée prend oui/non comme valeur.
+# 5. Conclusion
 
-\begin{equation}
-Win_{t}^{i} = \alpha_{t} + \beta_{1,t} \cdot Rank_{t}^{i} + \beta_{2,t} \cdot X_{t}^{i} + \epsilon_{t}^{i}
-\end{equation}
-
-où :
-
-- $Win_{t}^{i}$ est une variable dummy qui mesure si le match i de la coupe du monde t a été gagné par l'équipe qui joue à domicile ou non.
-
-- $Rank_{t}^{i}$ est le rang de l'équipe qui joue à domicile.
-
-- $X_{t}^{i}$ est un vecteur comprenant les variables de contrôle telles que le nombre de carton jaune, le nombre de carton rouge, le nombre de tirs cadrés, etc.
-
-
-Le modèle peut se réécrire comme suit :
-
-$$ P(Win_{t}^{i}=1 | Rank_{t}^{i},X_{t}^{i}) = \Phi(\alpha + \beta_1 Rank_{t}^{i} + \beta_2 X_{t}^{i} + \epsilon_{t}^{i}) $$
-
-```{r}
-#On estime le modèle probit pour la Coupe du Monde 1994
-model_1994 <- glm(Home.Win ~ FIFA_Rank.Diff +
-                        Goals_Diff +
-                        Yellow.Card.Diff +
-                        Red.Card.Diff,
-                        data = WC_1994,
-                        family = binomial(link = "probit"))
-
-#Stargazer le modèle
-stargazer(model_1994, type = "text", digits = 3, title = "Modèle de régression probit pour la Coupe du Monde 1994", column.labels = c("1994"))
-
-#On estime le modèle probit pour la Coupe du Monde 2006
-model_2006 <- glm(Home.Win ~ FIFA_Rank.Diff +
-                        Possession.Diff +
-                        Shots.Diff +
-                        Shots.On.Target.Diff +
-                        Fouls.Diff +
-                        Saves.Diff +
-                        Yellow.Card.Diff +
-                        Red.Card.Diff,
-                        data = WC_2006,
-                        family = binomial(link = "probit"))
-
-#Stargazer le modèle
-stargazer(model_2006, type = "text", digits = 3, title = "Modèle de régression probit pour la Coupe du Monde 2006", column.labels = c("2006"))
-```
-
+  Sur le premier groupe — Coupes du Monde 1994, 1998 et 2002 — le seul coefficient significatif est celui associé à la variable de différence de classement FIFA. Le coefficient significatif négatif indique que les équipes ayant un meilleur classement FIFA ont tendances à marquer plus que les autres. De plus, la variable de différence de carton rouge est significative et négative pour l'année 2002. Ainsi et toutes choses égales par ailleurs, un carton rouge est associé à une diminution du nombre de buts marqué. Cela peut suggérer que les équipes qui reçoivent plus de cartons rouges ont plus de difficulté à maintenir leur stratégie de jeu, ce qui peut affaiblir leur performance sur le terrain et leur capacité à marquer.
+  
+  Contrairement à la conclusion de Saumik Paul and Ronita Mitra, le coefficient associé à la variable d'affluence ne peut pas être interprété. En effet, il n'est pas significatif au seuil de 5% et est très proche de 0. De même pour le coefficient associé à la variable de différence de carton jaune, il n'est pas significatif et ne peut donc pas être interpréter.
+  
+  De manière plus générale, on voit que le coefficient de détermination $R²$ est en moyenne de 0.2 sur nos 3 modèles. Ainsi, seulement 20% de la variation de la différence de buts est en moyenne expliquée par le modèle, permettant de conclure qu'il n'est pas correctement estimé.
+  
+  
+  Sur le deuxième groupe — Coupes du Monde 2006, 2010, 2014, 2018 et 2022 — il y beaucoup plus de variables significatives. Le classement FIFA n'est plus significatif pour toutes les éditions de la Coupe du Monde. Cela peut être dû à l'ajout des variables de contrôle qui capturent des aspects importants des performances des équipes qui sont liés au classement FIFA, mais qui ne sont pas directement mesurés par celui-ci.
+  On voit que la variable de possession de balle ainsi que celle des cartons jaunes n'est pas significative. Cela indique que le fait de garder plus la balle ou d'être plus agressif n'a pas d'impact sur la différence de but finale.
+  
+  Les variables de tirs cadrés et d'arrêts sont, elles, significatives et positives au seuil de 5% pour chaque édition de la Coupe du Monde. Les équipes qui ont plus de tirs cadrés ont tendance à marquer plus de buts. Cela est logique et suggère que  les équipes qui ont un jeu plus précis et qui ciblent mieux le but adverse ont une plus grande probabilité de réussir leurs attaques, ce qui vient contraster la non-significativité du coefficient associé à la variable tir. Ce n'est en effet pas parce qu'une équipe tir plus au but, qu'elle augmentera sa probabilité de marquer, au sens de notre modèle. La variable de différence d'arrêt donne la réflexion inverse de la variable tir, plus l'équipe aura un bon gardien et une défense solide, moins elle aura de chance de concéder un but.
+  
+  Contrairement au premier modèle, on peut considérer celui-ci comme correctement estimé. En effet, le $R²$ est en moyenne de 0.63, montrant que le modèle explique en moyenne 62% de la variance de la différence de buts. Pour l'édition 2018, le modèle explique même jusqu'à 90% de cette variation.
