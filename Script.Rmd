@@ -6,18 +6,8 @@ output:
   html_document:
     toc: yes
     toc_depth: '2'
+    toc_float: true
     df_print: paged
-  pdf_document2:
-    pandoc_args: "--pdf-engine=xelatex"
-    keep_tex: yes
-    df_print: kable
-    toc: yes
-    toc_depth: 2
-    number_sections: yes
-    always_allow_html: yes
-  pdf_document:
-    toc: yes
-    toc_depth: '2'
 ---
 
 ```{r setup, include=FALSE}
@@ -26,6 +16,11 @@ library(tidyverse)
 library(ggplot2)
 library(readr)
 library(plotly)
+library(stargazer)
+library(lmtest)
+library(car)
+library(webshot)
+library(htmltools)
 ```
 
 # 1. Introduction
@@ -157,6 +152,16 @@ WC_matches_stats <- WC_matches_stats %>%
   mutate(hname = ifelse(hname == "South Korea", "Korea Republic", hname))
 WC_matches_stats <- WC_matches_stats %>%
   mutate(aname = ifelse(aname == "South Korea", "Korea Republic", aname))
+#Ivory Coast as Côte d'Ivoire
+WC_matches_stats <- WC_matches_stats %>% 
+  mutate(hname = ifelse(hname == "Ivory Coast", "Côte d'Ivoire", hname))
+WC_matches_stats <- WC_matches_stats %>%
+  mutate(aname = ifelse(aname == "Ivory Coast", "Côte d'Ivoire", aname))
+#Serbia & Montenegro as Serbia and Montenegro
+WC_matches_stats <- WC_matches_stats %>% 
+  mutate(hname = ifelse(hname == "Serbia & Montenegro", "Serbia and Montenegro", hname))
+WC_matches_stats <- WC_matches_stats %>%
+  mutate(aname = ifelse(aname == "Serbia & Montenegro", "Serbia and Montenegro", aname))
 
 #On ajoute les différences des nouvelles stats
 WC_matches_stats <- WC_matches_stats %>% 
@@ -356,6 +361,9 @@ for (i in 1:nrow(WC_database)) {
   WC_database$FIFA_Rank.Home[i] <- get_rank(WC_database$Year[i], WC_database$Home[i])
   WC_database$FIFA_Rank.Away[i] <- get_rank(WC_database$Year[i], WC_database$Away[i])
 }
+
+#On ajoute la colonne "FIFA_Rank.Diff" dans le dataframe "WC_database"
+WC_database$FIFA_Rank.Diff <- WC_database$FIFA_Rank.Home - WC_database$FIFA_Rank.Away
 ```
 
 ## 2.5 Création d'une dataframe par coupe du monde
@@ -427,4 +435,90 @@ Nous pouvons observer une diminution du nombre de cartons jaunes et rouges par m
 
 Le modèle de regression linéaire suivant est estimé pour chaque année de la Coupe du Monde :
 
-$\Delta$Buts = $\beta_0$ + $\beta_1$ $\Delta$Carton jaune + $\beta_2$ $\Delta$Carton rouge 
+\[\Delta \text{Buts}_t^i = \beta_0 + \beta_1 \Delta \text{Rank}_t^i + \beta_2 \Delta \text{X}_t^i + \beta_3 \Delta \text{Attendence}_t^i + \varepsilon_t^i\]
+
+avec le match i, de l'année de coupe du monde t, et $\Delta \text{X}_t^i$ le vecteur des variables de contrôles. Le vecteur X contient, selon les années, plus ou moins de variables de contrôle en fonction des données qui disponibles. Cependant à partir de 2006, les variables de contrôle sont : La différence du nombre de carton jaune, rouge, du nombre de fautes, de possession, du nombre de tirs et de tirs cadrés. Pour certaines années, la différence du nombre d'arrêt est incluse.
+
+### 4.1.1 Modèle de régression linéaire pour la Coupe du Monde 1994, 1998 et 2002
+
+Pour ces 3 Coupes du Monde, les statistiques disponibles sont limitées.
+```{r}
+model_1994 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Attendance, data = WC_1994)
+model_1998 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Attendance, data = WC_1998)
+model_2002 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Attendance, data = WC_2002)
+
+#On vérifie que les résidus ne sont pas héteroscedastiques avec le test de Breusch-Pagan
+bptest(model_1994)
+bptest(model_1998)
+bptest(model_2002)
+
+#On vérifie que les résidus ne sont pas autocorrélés avec le test de Durbin-Watson
+dwtest(model_1994)
+dwtest(model_1998)
+dwtest(model_2002)
+
+#On vérifie qu'il n'y pas de multicollinéarité avec le test de variance inflation factor
+vif(model_1994)
+vif(model_1998)
+vif(model_2002)
+
+#Stargazer les 3 modèles, on arrondit les coefficients à 3 chiffres après la virgule et on renomme les modèles en 1994, 1998 et 2002. On utilise pas renamer = FALSE car cela ne fonctionne pas avec stargazer.
+stargazer(model_1994, model_1998, model_2002, type = "text", digits = 3, title = "Modèle de régression linéaire pour la Coupe du Monde 1994, 1998 et 2002", 
+          column.labels = c("1994", "1998", "2002"))
+```
+
+On voit qu'il n'y a que le coefficient de la variable de différence de classement fifa qui est significatif pour les 3 modèles.
+
+### 4.1.2 Modèle de régression linéaire pour la Coupe du Monde 2006, 2010, 2014, 2018 et 2022
+
+Pour ces 4 Coupes du Monde, les statistiques disponibles sont plus nombreuses.
+```{r}
+model_2006 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Saves.Diff + Attendance, data = WC_2006)
+model_2010 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Saves.Diff + Attendance, data = WC_2010)
+model_2014 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Saves.Diff + Attendance, data = WC_2014)
+model_2018 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Saves.Diff + Attendance, data = WC_2018)
+model_2022 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Attendance, data = WC_2022)
+
+#On vérifie que les résidus ne sont pas héteroscedastiques avec le test de Breusch-Pagan
+bp_2006 <- bptest(model_2006)
+bp_2010 <- bptest(model_2010)
+bp_2014 <- bptest(model_2014)
+bp_2018 <- bptest(model_2018)
+bp_2022 <- bptest(model_2022)
+
+# Exécution des tests de Durbin-Watson
+dwtest_2006 <- dwtest(model_2006)$p.value[1]
+dwtest_2010 <- dwtest(model_2010)$p.value[1]
+dwtest_2014 <- dwtest(model_2014)$p.value[1]
+dwtest_2018 <- dwtest(model_2018)$p.value[1]
+dwtest_2022 <- dwtest(model_2022)$p.value[1]
+
+# Exécution des tests de variance inflation factor
+vif_2006 <- vif(model_2006)[1]
+vif_2010 <- vif(model_2010)[1]
+vif_2014 <- vif(model_2014)[1]
+vif_2018 <- vif(model_2018)[1]
+vif_2022 <- vif(model_2022)[1]
+
+# Création d'un tableau récapitulatif
+tableau <- data.frame(Model = c("2006", "2010", "2014", "2018", "2022"),
+                      BP_p_value = c(bp_2006$p.value, bp_2010$p.value, bp_2014$p.value, bp_2018$p.value, bp_2022$p.value),
+                      DW_p_value = c(dw_2006, dw_2010, dw_2014, dw_2018, dw_2022),
+                      VIF = c(vif_2006, vif_2010, vif_2014, vif_2018, vif_2022))
+tableau
+
+#Stargazer pour 2006, 2010 et 2014
+stargazer(model_2006, model_2010, model_2014, model_2018,
+          type = "text",
+          digits = 3,
+          omit = "std.error",
+          omit.stat = "f",
+          title = "Modèle de régression linéaire pour la Coupe du Monde 2006, 2010 et 2014", 
+          column.labels = c("2006", "2010", "2014", "2018"))
+
+#Stargazer pour 2018 et 2022
+stargazer(model_2018, model_2022, type = "text", digits = 3, title = "Modèle de régression linéaire pour la Coupe du Monde 2018 et 2022", 
+          column.labels = c("2018", "2022"))
+```
+
+### 4.1.3 Modèle de régression linéaire pour la Coupe du Monde 2022
