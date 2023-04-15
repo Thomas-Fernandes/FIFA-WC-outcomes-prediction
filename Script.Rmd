@@ -222,15 +222,21 @@ WC_matches_2022$Fouls.Diff <- WC_matches_2022$fouls.team1 - WC_matches_2022$foul
 #On garde que les colonnes qui nous intéressent
 WC_matches_2022_22 <- subset(WC_matches_2022, select = c(1:7, 11, 12, 21, 22, 57:62, 89:96))
 
+#On renomme iran en ir iran avec mutate
+WC_matches_2022_22 <- WC_matches_2022_22 %>% 
+  mutate(team1 = ifelse(team1 == "IRAN", "IR IRAN", team1))
+WC_matches_2022_22 <- WC_matches_2022_22 %>%
+  mutate(team2 = ifelse(team2 == "IRAN", "IR IRAN", team2))
+
 #On renomme les colonnes pour qu'elles soient identiques à celles de WC_database
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "team1"] <- "Home"
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "team2"] <- "Away"
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "number.of.goals.team1"] <- "Home.Goals"
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "number.of.goals.team2"] <- "Away.Goals"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "yellow.cards.team1"] <- "Home.Yellow.Cards.Count"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "yellow.cards.team2"] <- "Away.Yellow.Cards.Count"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "red.cards.team1"] <- "Home.Red.Cards.Count"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "red.cards.team2"] <- "Away.Red.Cards.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "yellow.cards.team1"] <- "Home.Yellow.Card.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "yellow.cards.team2"] <- "Away.Yellow.Card.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "red.cards.team1"] <- "Home.Red.Card.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "red.cards.team2"] <- "Away.Red.Card.Count"
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "total.attempts.team1"] <- "hshots"
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "total.attempts.team2"] <- "ashots"
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "on.target.attempts.team1"] <- "hshotsOnTarget"
@@ -268,10 +274,10 @@ for (i in 1:nrow(WC_database)) {
     WC_database$ashotsOnTarget[i] <- WC_matches_2022_22$ashotsOnTarget[matching_row]
     WC_database$hfouls[i] <- WC_matches_2022_22$hfouls[matching_row]
     WC_database$afouls[i] <- WC_matches_2022_22$afouls[matching_row]
-    WC_database$Home.Yellow.Cards.Count[i] <- WC_matches_2022_22$Home.Yellow.Cards.Count[matching_row]
-    WC_database$Away.Yellow.Cards.Count[i] <- WC_matches_2022_22$Away.Yellow.Cards.Count[matching_row]
-    WC_database$Home.Red.Cards.Count[i] <- WC_matches_2022_22$Home.Red.Cards.Count[matching_row]
-    WC_database$Away.Red.Cards.Count[i] <- WC_matches_2022_22$Away.Red.Cards.Count[matching_row]
+    WC_database$Home.Yellow.Card.Count[i] <- WC_matches_2022_22$Home.Yellow.Card.Count[matching_row]
+    WC_database$Away.Yellow.Card.Count[i] <- WC_matches_2022_22$Away.Yellow.Card.Count[matching_row]
+    WC_database$Home.Red.Card.Count[i] <- WC_matches_2022_22$Home.Red.Card.Count[matching_row]
+    WC_database$Away.Red.Card.Count[i] <- WC_matches_2022_22$Away.Red.Card.Count[matching_row]
     WC_database$Possession.Diff[i] <- WC_matches_2022_22$Possession.Diff[matching_row]
     WC_database$Shots.Diff[i] <- WC_matches_2022_22$Shots.Diff[matching_row]
     WC_database$Shots.On.Target.Diff[i] <- WC_matches_2022_22$Shots.On.Target.Diff[matching_row]
@@ -334,3 +340,16 @@ for (i in 1:nrow(WC_database)) {
 }
 ```
 
+## 2.5 Création d'une dataframe par coupe du monde
+
+```{r}
+#On crée une dataframe par coupe du monde
+WC_1994 <- subset(WC_database, Year == 1994)
+WC_1998 <- subset(WC_database, Year == 1998)
+WC_2002 <- subset(WC_database, Year == 2002)
+WC_2006 <- subset(WC_database, Year == 2006)
+WC_2010 <- subset(WC_database, Year == 2010)
+WC_2014 <- subset(WC_database, Year == 2014)
+WC_2018 <- subset(WC_database, Year == 2018)
+WC_2022 <- subset(WC_database, Year == 2022)
+```
