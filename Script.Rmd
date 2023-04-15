@@ -3,7 +3,21 @@ title: "FIFA WC outcomes prediction"
 author: "Thomas Fernandes"
 date: "2023-04-12"
 output:
-  pdf_document: default
+  html_document:
+    toc: yes
+    toc_depth: '2'
+    df_print: paged
+  pdf_document2:
+    pandoc_args: "--pdf-engine=xelatex"
+    keep_tex: yes
+    df_print: kable
+    toc: yes
+    toc_depth: 2
+    number_sections: yes
+    always_allow_html: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 ---
 
 ```{r setup, include=FALSE}
@@ -11,6 +25,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ggplot2)
 library(readr)
+library(plotly)
 ```
 
 # 1. Introduction
@@ -287,6 +302,9 @@ for (i in 1:nrow(WC_database)) {
   }
 }
 
+#On ajoute une colonne valant 1 si Home gagne et 0 sinon. On peut utiliser la différence de but pour ça (si Home gagne, Diff > 0)
+WC_database$Home.Win <- ifelse(WC_database$Goals_Diff > 0, 1, 0)
+
 ```
 
 
@@ -353,3 +371,60 @@ WC_2014 <- subset(WC_database, Year == 2014)
 WC_2018 <- subset(WC_database, Year == 2018)
 WC_2022 <- subset(WC_database, Year == 2022)
 ```
+
+# 3. Statistiques descriptives
+
+## 3.1 Moyenne de buts par match
+
+```{r}
+#On plot la moyenne de but marqués par une équipe à domicile et à l'extérieur pour chaque année de la Coupe du monde. En absisse, on a l'année de la Coupe du monde et en ordonnée, le nombre de but marqués. On utilise plotly pour avoir un graphique interactif.
+plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
+                y = c(mean(WC_1994$Home.Goals), mean(WC_1998$Home.Goals), mean(WC_2002$Home.Goals), mean(WC_2006$Home.Goals), mean(WC_2010$Home.Goals), mean(WC_2014$Home.Goals), mean(WC_2018$Home.Goals), mean(WC_2022$Home.Goals)),
+                type = "bar",
+                name = "Home Goals") %>%
+  add_trace(y = c(mean(WC_1994$Away.Goals), mean(WC_1998$Away.Goals), mean(WC_2002$Away.Goals), mean(WC_2006$Away.Goals), mean(WC_2010$Away.Goals), mean(WC_2014$Away.Goals), mean(WC_2018$Away.Goals), mean(WC_2022$Away.Goals)),
+            name = "Away Goals") %>%
+  layout(title = "Moyenne de buts par match",
+         xaxis = list(title = "Year"),
+         yaxis = list(title = "Goals"))
+```
+
+Nous constatons une stabilité de la moyenne de buts marqués au fil des différentes éditions de la Coupe du Monde. Par ailleurs, nous remarquons que la moyenne de buts marqués à domicile est légèrement supérieure à celle à l'extérieur, bien que le choix de l'équipe à domicile et à l'extérieur soit déterminé par un tirage au sort.
+
+## 3.2 Moyenne de carton jaune et rouge par match
+
+```{r}
+#On plot la moyenne de carton jaune par match pour chaque année de la Coupe du monde. En absisse, on a l'année de la Coupe du monde et en ordonnée, le nombre de carton jaune. On utilise plotly pour avoir un graphique interactif.
+plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
+                y = c(mean(WC_1994$Home.Yellow.Card.Count), mean(WC_1998$Home.Yellow.Card.Count), mean(WC_2002$Home.Yellow.Card.Count), mean(WC_2006$Home.Yellow.Card.Count), mean(WC_2010$Home.Yellow.Card.Count), mean(WC_2014$Home.Yellow.Card.Count), mean(WC_2018$Home.Yellow.Card.Count), mean(WC_2022$Home.Yellow.Card.Count)),
+                type = "bar",
+                name = "Home Yellow Cards") %>%
+  add_trace(y = c(mean(WC_1994$Away.Yellow.Card.Count), mean(WC_1998$Away.Yellow.Card.Count), mean(WC_2002$Away.Yellow.Card.Count), mean(WC_2006$Away.Yellow.Card.Count), mean(WC_2010$Away.Yellow.Card.Count), mean(WC_2014$Away.Yellow.Card.Count), mean(WC_2018$Away.Yellow.Card.Count), mean(WC_2022$Away.Yellow.Card.Count)),
+            name = "Away Yellow Cards") %>%
+  layout(title = "Moyenne de carton jaune par match",
+         xaxis = list(title = "Year"),
+         yaxis = list(title = "Yellow Cards"))
+```
+
+```{r}
+#On plot la moyenne de carton rouge par match pour chaque année de la Coupe du monde. En absisse, on a l'année de la Coupe du monde et en ordonnée, le nombre de carton rouge. On utilise plotly pour avoir un graphique interactif.
+plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
+                y = c(mean(WC_1994$Home.Red.Card.Count), mean(WC_1998$Home.Red.Card.Count), mean(WC_2002$Home.Red.Card.Count), mean(WC_2006$Home.Red.Card.Count), mean(WC_2010$Home.Red.Card.Count), mean(WC_2014$Home.Red.Card.Count), mean(WC_2018$Home.Red.Card.Count), mean(WC_2022$Home.Red.Card.Count)),
+                type = "bar",
+                name = "Home Red Cards") %>%
+  add_trace(y = c(mean(WC_1994$Away.Red.Card.Count), mean(WC_1998$Away.Red.Card.Count), mean(WC_2002$Away.Red.Card.Count), mean(WC_2006$Away.Red.Card.Count), mean(WC_2010$Away.Red.Card.Count), mean(WC_2014$Away.Red.Card.Count), mean(WC_2018$Away.Red.Card.Count), mean(WC_2022$Away.Red.Card.Count)),
+            name = "Away Red Cards") %>%
+  layout(title = "Moyenne de carton rouge par match",
+         xaxis = list(title = "Year"),
+         yaxis = list(title = "Red Cards"))
+```
+
+Nous pouvons observer une diminution du nombre de cartons jaunes et rouges par match au fil des années de la Coupe du Monde. Cette tendance peut être expliquée par une possible évolution dans la sévérité des arbitres, qui pourraient être de moins en moins stricts dans leur distribution de cartons, ou par une amélioration du comportement disciplinaire des joueurs, notamment depuis l'introduction de la VAR qui permet de mieux contrôler les fautes commises.
+
+# 4.Modèle
+
+## 4.1 Modèle de régression linéaire
+
+Le modèle de regression linéaire suivant est estimé pour chaque année de la Coupe du Monde :
+
+$\Delta$Buts = $\beta_0$ + $\beta_1$ $\Delta$Carton jaune + $\beta_2$ $\Delta$Carton rouge 
