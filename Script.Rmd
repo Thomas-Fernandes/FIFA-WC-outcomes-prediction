@@ -511,4 +511,52 @@ stargazer(model_2006, model_2010, model_2014, model_2018, model_2022,
           column.labels = c("2006", "2010", "2014", "2018", "2022"))
 ```
 
-### 4.1.3 Modèle de régression linéaire pour la Coupe du Monde 2022
+## 4.2 Modèle de regression binomiale (modèle probit)
+
+A la différence du modèle MCO, le modeèle probit cherche à prédire une variable binaire. Les variables explicatives sont des variables continues mais la variable expliquée prend oui/non comme valeur.
+
+\begin{equation}
+Win_{t}^{i} = \alpha_{t} + \beta_{1,t} \cdot Rank_{t}^{i} + \beta_{2,t} \cdot X_{t}^{i} + \epsilon_{t}^{i}
+\end{equation}
+
+où :
+
+- $Win_{t}^{i}$ est une variable dummy qui mesure si le match i de la coupe du monde t a été gagné par l'équipe qui joue à domicile ou non.
+
+- $Rank_{t}^{i}$ est le rang de l'équipe qui joue à domicile.
+
+- $X_{t}^{i}$ est un vecteur comprenant les variables de contrôle telles que le nombre de carton jaune, le nombre de carton rouge, le nombre de tirs cadrés, etc.
+
+
+Le modèle peut se réécrire comme suit :
+
+$$ P(Win_{t}^{i}=1 | Rank_{t}^{i},X_{t}^{i}) = \Phi(\alpha + \beta_1 Rank_{t}^{i} + \beta_2 X_{t}^{i} + \epsilon_{t}^{i}) $$
+
+```{r}
+#On estime le modèle probit pour la Coupe du Monde 1994
+model_1994 <- glm(Home.Win ~ FIFA_Rank.Diff +
+                        Goals_Diff +
+                        Yellow.Card.Diff +
+                        Red.Card.Diff,
+                        data = WC_1994,
+                        family = binomial(link = "probit"))
+
+#Stargazer le modèle
+stargazer(model_1994, type = "text", digits = 3, title = "Modèle de régression probit pour la Coupe du Monde 1994", column.labels = c("1994"))
+
+#On estime le modèle probit pour la Coupe du Monde 2006
+model_2006 <- glm(Home.Win ~ FIFA_Rank.Diff +
+                        Possession.Diff +
+                        Shots.Diff +
+                        Shots.On.Target.Diff +
+                        Fouls.Diff +
+                        Saves.Diff +
+                        Yellow.Card.Diff +
+                        Red.Card.Diff,
+                        data = WC_2006,
+                        family = binomial(link = "probit"))
+
+#Stargazer le modèle
+stargazer(model_2006, type = "text", digits = 3, title = "Modèle de régression probit pour la Coupe du Monde 2006", column.labels = c("2006"))
+```
+
