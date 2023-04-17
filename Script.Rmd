@@ -21,6 +21,7 @@ library(lmtest)
 library(car)
 library(webshot)
 library(htmltools)
+library(rsq)
 ```
 
 # 1. Introduction
@@ -552,8 +553,188 @@ Le modèle peut se réécrire comme suit :
 
 $$ P(Win_{t}^{i}=1 | Rank_{t}^{i},X_{t}^{i}) = \Phi(\alpha + \beta_1 Rank_{t}^{i} + \beta_2 X_{t}^{i} + \epsilon_{t}^{i}) $$
 
-
 ```{r}
+# Créer un dataframe vide pour stocker les données transformées
+WC_Probit <- data.frame()
+
+# Boucle pour chaque ligne de données
+for (i in 1:nrow(WC_database)) {
+  
+  # Extraire les informations sur l'équipe à domicile
+  home_team <- WC_database[i, "Home"]
+  home_goals <- WC_database[i, "Home.Goals"]
+  home_red_cards <- WC_database[i, "Home.Red.Card.Count"]
+  home_yellow_cards <- WC_database[i, "Home.Yellow.Card.Count"]
+  home_substitutions <- WC_database[i, "Home.Substitution.Count"]
+  home_possession <- WC_database[i, "hPossesion"]
+  home_shots_on_target <- WC_database[i, "hshotsOnTarget"]
+  home_shots <- WC_database[i, "hshots"]
+  home_fouls <- WC_database[i, "hfouls"]
+  home_saves <- WC_database[i, "hsaves"]
+  
+  # Extraire les informations sur l'équipe à l'extérieur
+  away_team <- WC_database[i, "Away"]
+  away_goals <- WC_database[i, "Away.Goals"]
+  away_red_cards <- WC_database[i, "Away.Red.Card.Count"]
+  away_yellow_cards <- WC_database[i, "Away.Yellow.Card.Count"]
+  away_substitutions <- WC_database[i, "Away.Substitution.Count"]
+  away_possession <- WC_database[i, "aPossesion"]
+  away_shots_on_target <- WC_database[i, "ashotsOnTarget"]
+  away_shots <- WC_database[i, "ashots"]
+  away_fouls <- WC_database[i, "afouls"]
+  away_saves <- WC_database[i, "asaves"]
+  
+  # Créer une observation pour l'équipe à domicile
+  home_observation <- data.frame(Team = home_team,
+                                 Goals = home_goals,
+                                 Red_Cards = home_red_cards,
+                                 Yellow_Cards = home_yellow_cards,
+                                 Substitutions = home_substitutions,
+                                 Possession = home_possession,
+                                 Shots_On_Target = home_shots_on_target,
+                                 Shots = home_shots,
+                                 Fouls = home_fouls,
+                                 Saves = home_saves,
+                                 Win = ifelse(home_goals > away_goals, 1, 0),
+                                 Year = WC_database[i, "Year"],
+                                 Round = WC_database[i, "Round"])
+  
+  # Créer une observation pour l'équipe à l'extérieur
+  away_observation <- data.frame(Team = away_team,
+                                 Goals = away_goals,
+                                 Red_Cards = away_red_cards,
+                                 Yellow_Cards = away_yellow_cards,
+                                 Substitutions = away_substitutions,
+                                 Possession = away_possession,
+                                 Shots_On_Target = away_shots_on_target,
+                                 Shots = away_shots,
+                                 Fouls = away_fouls,
+                                 Saves = away_saves,
+                                 Win = ifelse(away_goals > home_goals, 1, 0),
+                                 Year = WC_database[i, "Year"],
+                                 Round = WC_database[i, "Round"])
+  
+  # Ajouter les observations au dataframe transformé
+  WC_Probit <- rbind(WC_Probit, home_observation, away_observation)
+}
+
+WC_Probit <- merge(WC_Probit, FIFA_rank, by.x = c("Team", "Year"), by.y = c("country_full", "Year"), all.x = TRUE)
+WC_Probit <- WC_Probit[,-c(15:20)]
 
 ```
 
+```{r}
+
+#On fait notre regression logistique pour la coupe du monde 1994
+#Cela correspond à Win = Rank + Goal + Yellow + Red
+model_probit_1994 <- glm(Win ~ rank + Goals + Yellow_Cards + Red_Cards, data = WC_Probit[WC_Probit$Year == 1994,], family = binomial(link = "logit"))
+
+#CDM 1998
+model_probit_1998 <- glm(Win ~ rank + Goals + Yellow_Cards + Red_Cards, data = WC_Probit[WC_Probit$Year == 1998,], family = binomial(link = "logit"))
+
+#CDM 2002
+model_probit_2002 <- glm(Win ~ rank + Goals + Yellow_Cards + Red_Cards, data = WC_Probit[WC_Probit$Year == 2002,], family = binomial(link = "logit"))
+
+#Stargazer pour afficher les résultats, en spécifiant l'édition de la coupe du monde dans le nom de la colonne
+stargazer(model_probit_1994, model_probit_1998, model_probit_2002,
+          type = "text",
+          title = "Probit model for the World Cup 1994, 1998 and 2002",
+          column.labels = c("1994", "1998", "2002"),
+          dep.var.labels = "Win")
+
+```
+
+```{r}
+#Pour les prochaines CDM, on ajoute les variables de contrôle
+#CDM 2006
+model_probit_2006 <- glm(Win ~ rank +
+                               Goals +
+                               Yellow_Cards +
+                               Red_Cards +
+                               Substitutions +
+                               Possession  +
+                               Shots +
+                               Shots_On_Target +
+                               Fouls +
+                               Saves,
+                               na.action = na.exclude,
+                               data = WC_Probit[WC_Probit$Year == 2006,],
+                               family = binomial(link = "logit"))
+
+
+#CDM 2010
+model_probit_2010 <- glm(Win ~ rank +
+                               Goals +
+                               Yellow_Cards +
+                               Red_Cards +
+                               Substitutions +
+                               Possession  +
+                               Shots +
+                               Shots_On_Target +
+                               Fouls +
+                               Saves,
+                               na.action = na.exclude,
+                               data = WC_Probit[WC_Probit$Year == 2010,],
+                               family = binomial(link = "logit"))
+
+#CDM 2014
+model_probit_2014 <- glm(Win ~ rank +
+                               Goals +
+                               Yellow_Cards +
+                               Red_Cards +
+                               Substitutions +
+                               Possession  +
+                               Shots +
+                               Shots_On_Target +
+                               Fouls +
+                               Saves,
+                               na.action = na.exclude,
+                               data = WC_Probit[WC_Probit$Year == 2014,],
+                               family = binomial(link = "logit"))
+
+#CDM 2018
+model_probit_2018 <- glm(Win ~ rank +
+                               Goals +
+                               Yellow_Cards +
+                               Red_Cards +
+                               Substitutions +
+                               Possession  +
+                               Shots +
+                               Shots_On_Target +
+                               Fouls +
+                               Saves,
+                               na.action = na.exclude,
+                               data = WC_Probit[WC_Probit$Year == 2018,],
+                               family = binomial(link = "logit"))
+
+#CDM 2022
+model_probit_2022 <- glm(Win ~ rank +
+                               Goals +
+                               Yellow_Cards +
+                               Red_Cards +
+                               Substitutions +
+                               Possession  +
+                               Shots +
+                               Shots_On_Target +
+                               Fouls,
+                               na.action = na.exclude,
+                               data = WC_Probit[WC_Probit$Year == 2022,],
+                               family = binomial(link = "logit"))
+
+#Stargazer pour afficher les résultats en spécifiant l'édition de la coupe du monde dans le nom de la colonne
+stargazer(model_probit_2006, model_probit_2010, model_probit_2014,
+          type = "text",
+          title = "Probit model for the World Cup 2006, 2010, 2014",
+          column.labels = c("2006", "2010", "2014", "2018", "2022"),
+          dep.var.labels = "Win")
+
+#Pareil pour 2018 et 2022
+stargazer(model_probit_2018, model_probit_2022,
+          type = "text",
+          title = "Probit model for the World Cup 2018 and 2022",
+          column.labels = c("2018", "2022"),
+          dep.var.labels = "Win")
+
+
+
+```
