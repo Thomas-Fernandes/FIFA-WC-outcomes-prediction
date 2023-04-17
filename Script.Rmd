@@ -21,18 +21,18 @@ library(lmtest)
 library(car)
 library(webshot)
 library(htmltools)
-library(rsq)
+library(margins)
 ```
 
 # 1. Introduction
 
 ## 1.1 Ce que dit l'article
 
-Cet article examine la prévisibilité des résultats de la Coupe du monde de football en utilisant deux modèles empiriques. Depuis 1993, le système de classement mensuel (couramment appelé coefficient des pays) de la FIFA pour les équipes nationales de football seniors est devenu une source fiable pour juger du potentiel d'une équipe dans la compétition. Cependant, l'article montre que, malgré le nombre de surprises dans les résultats des matchs, les équipes les mieux classées ont généralement de meilleures performances. Les auteurs analysent les résultats des quatre dernières Coupes du monde de la FIFA de 1994 à 2006 et utilisent les classements mensuels de la FIFA pour évaluer les performances des équipes. Deux modèles empiriques sont proposés : un modèle probit et un modèle de régression linéaire MCO. Le premier modèle évalue la probabilité de victoire pour chaque équipe en fonction de son classement FIFA, tandis que le second modèle utilise la différence de buts comme variable dépendante pour voir si les équipes les mieux classées ont généralement des performances supérieures. Les auteurs trouvent des preuves empiriques que, malgré les surprises occasionnelles, les équipes les mieux classées ont généralement de meilleures performances.
+Cet article examine la prévisibilité des résultats de la Coupe du monde de football en utilisant deux modèles empiriques. Depuis 1993, le système de classement mensuel (couramment appelé coefficient des pays) de la FIFA pour les équipes nationales de football seniors est devenu une source fiable pour juger du potentiel d'une équipe dans la compétition. Cependant, l'article montre que, malgré le nombre de surprises dans les résultats des matchs, les équipes les mieux classées ont généralement de meilleures performances. Les auteurs analysent les résultats des quatre Coupes du monde de la FIFA de 1994 à 2006 et utilisent les classements mensuels de la FIFA pour évaluer les performances des équipes. Deux modèles empiriques sont proposés : un modèle probit et un modèle de régression linéaire MCO. Le premier modèle évalue la probabilité de victoire pour chaque équipe en fonction de son classement FIFA, tandis que le second modèle utilise la différence de buts comme variable dépendante pour voir si les équipes les mieux classées ont généralement des performances supérieures. Les auteurs trouvent des preuves empiriques que, malgré les surprises occasionnelles, les équipes les mieux classées ont généralement de meilleures performances.
 
 ## 1.2 Ce qu'on cherche à faire
 
-A rédiger
+L'objectif de cette étude est de répliquer les résultats de l'article en utilisant en utiisant les mêmes données que les auteurs, ainsi que d'autres plus récentes. Bien que le modèle probit et le modèle de régression linéaire MCO proposés dans l'article soient reproductibles, certaines variables de contrôle utilisées par les auteurs ne sont pas disponibles pour la période de 206 à 2022. Ainsi, nous avons remplacé ces variables par d'autres indicateurs pertinents, tels que le nombre de changement effectué par chaque équipe, le nombre de tirs en plus du nombre de tirs cadrés, ainsi que le nombre d'arrêts. En utilisant ces variables alternatives, nous examinons si les conclusions de l'article original peuvent être étendues à une période plus récente de la Coupe du monde de football. Nous testons également la validité de la méthode de classement de la FIFA et de son utilisation comme proxy pour la performance des équipes.
 
 # 2. Traitement des données
 
@@ -514,25 +514,21 @@ stargazer(model_2006, model_2010, model_2014, model_2018, model_2022,
           column.labels = c("2006", "2010", "2014", "2018", "2022"))
 ```
 
+Sur le premier groupe — Coupes du Monde 1994, 1998 et 2002 — le seul coefficient significatif est celui associé à la variable de différence de classement FIFA. Le coefficient significatif négatif indique que les équipes ayant un meilleur classement FIFA ont tendances à marquer plus que les autres. De plus, la variable de différence de carton rouge est significative et négative pour l'année 2002. Ainsi et toutes choses égales par ailleurs, un carton rouge est associé à une diminution du nombre de buts marqué. Cela peut suggérer que les équipes qui reçoivent plus de cartons rouges ont plus de difficulté à maintenir leur stratégie de jeu, ce qui peut affaiblir leur performance sur le terrain et leur capacité à marquer.
+  
+Contrairement à la conclusion de Saumik Paul and Ronita Mitra, le coefficient associé à la variable d'affluence ne peut pas être interprété. En effet, il n'est pas significatif au seuil de 5% et est très proche de 0. De même pour le coefficient associé à la variable de différence de carton jaune, il n'est pas significatif et ne peut donc pas être interpréter.
+  
+De manière plus générale, on voit que le coefficient de détermination $R²$ est en moyenne de 0.2 sur nos 3 modèles. Ainsi, seulement 20% de la variation de la différence de buts est en moyenne expliquée par le modèle, permettant de conclure qu'il n'est pas correctement estimé.
+  
+  
+Sur le deuxième groupe — Coupes du Monde 2006, 2010, 2014, 2018 et 2022 — il y beaucoup plus de variables significatives. Le classement FIFA n'est plus significatif pour toutes les éditions de la Coupe du Monde. Cela peut être dû à l'ajout des variables de contrôle qui capturent des aspects importants des performances des équipes qui sont liés au classement FIFA, mais qui ne sont pas directement mesurés par celui-ci.
+On voit que la variable de possession de balle ainsi que celle des cartons jaunes n'est pas significative. Cela indique que le fait de garder plus la balle ou d'être plus agressif n'a pas d'impact sur la différence de but finale.
+  
+Les variables de tirs cadrés et d'arrêts sont, elles, significatives et positives au seuil de 5% pour chaque édition de la Coupe du Monde. Les équipes qui ont plus de tirs cadrés ont tendance à marquer plus de buts. Cela est logique et suggère que  les équipes qui ont un jeu plus précis et qui ciblent mieux le but adverse ont une plus grande probabilité de réussir leurs attaques, ce qui vient contraster la non-significativité du coefficient associé à la variable tir. Ce n'est en effet pas parce qu'une équipe tir plus au but, qu'elle augmentera sa probabilité de marquer, au sens de notre modèle. La variable de différence d'arrêt donne la réflexion inverse de la variable tir, plus l'équipe aura un bon gardien et une défense solide, moins elle aura de chance de concéder un but.
+  
+Contrairement au premier modèle, on peut considérer celui-ci comme correctement estimé. En effet, le $R²$ est en moyenne de 0.63, montrant que le modèle explique en moyenne 62% de la variance de la différence de buts. Pour l'édition 2018, le modèle explique même jusqu'à 90% de cette variation.
 
-# 5. Conclusion
-
-  Sur le premier groupe — Coupes du Monde 1994, 1998 et 2002 — le seul coefficient significatif est celui associé à la variable de différence de classement FIFA. Le coefficient significatif négatif indique que les équipes ayant un meilleur classement FIFA ont tendances à marquer plus que les autres. De plus, la variable de différence de carton rouge est significative et négative pour l'année 2002. Ainsi et toutes choses égales par ailleurs, un carton rouge est associé à une diminution du nombre de buts marqué. Cela peut suggérer que les équipes qui reçoivent plus de cartons rouges ont plus de difficulté à maintenir leur stratégie de jeu, ce qui peut affaiblir leur performance sur le terrain et leur capacité à marquer.
-  
-  Contrairement à la conclusion de Saumik Paul and Ronita Mitra, le coefficient associé à la variable d'affluence ne peut pas être interprété. En effet, il n'est pas significatif au seuil de 5% et est très proche de 0. De même pour le coefficient associé à la variable de différence de carton jaune, il n'est pas significatif et ne peut donc pas être interpréter.
-  
-  De manière plus générale, on voit que le coefficient de détermination $R²$ est en moyenne de 0.2 sur nos 3 modèles. Ainsi, seulement 20% de la variation de la différence de buts est en moyenne expliquée par le modèle, permettant de conclure qu'il n'est pas correctement estimé.
-  
-  
-  Sur le deuxième groupe — Coupes du Monde 2006, 2010, 2014, 2018 et 2022 — il y beaucoup plus de variables significatives. Le classement FIFA n'est plus significatif pour toutes les éditions de la Coupe du Monde. Cela peut être dû à l'ajout des variables de contrôle qui capturent des aspects importants des performances des équipes qui sont liés au classement FIFA, mais qui ne sont pas directement mesurés par celui-ci.
-  On voit que la variable de possession de balle ainsi que celle des cartons jaunes n'est pas significative. Cela indique que le fait de garder plus la balle ou d'être plus agressif n'a pas d'impact sur la différence de but finale.
-  
-  Les variables de tirs cadrés et d'arrêts sont, elles, significatives et positives au seuil de 5% pour chaque édition de la Coupe du Monde. Les équipes qui ont plus de tirs cadrés ont tendance à marquer plus de buts. Cela est logique et suggère que  les équipes qui ont un jeu plus précis et qui ciblent mieux le but adverse ont une plus grande probabilité de réussir leurs attaques, ce qui vient contraster la non-significativité du coefficient associé à la variable tir. Ce n'est en effet pas parce qu'une équipe tir plus au but, qu'elle augmentera sa probabilité de marquer, au sens de notre modèle. La variable de différence d'arrêt donne la réflexion inverse de la variable tir, plus l'équipe aura un bon gardien et une défense solide, moins elle aura de chance de concéder un but.
-  
-  Contrairement au premier modèle, on peut considérer celui-ci comme correctement estimé. En effet, le $R²$ est en moyenne de 0.63, montrant que le modèle explique en moyenne 62% de la variance de la différence de buts. Pour l'édition 2018, le modèle explique même jusqu'à 90% de cette variation.
-
-
-# 6. Modèle probit
+# 5. Modèle probit
 
 A la différence du modèle MCO, le modeèle probit cherche à prédire une variable binaire. Les variables explicatives sont des variables continues mais la variable expliquée prend oui/non comme valeur.
 
@@ -552,6 +548,12 @@ où :
 Le modèle peut se réécrire comme suit :
 
 $$ P(Win_{t}^{i}=1 | Rank_{t}^{i},X_{t}^{i}) = \Phi(\alpha + \beta_1 Rank_{t}^{i} + \beta_2 X_{t}^{i} + \epsilon_{t}^{i}) $$
+
+## 5.1 Nouveau dataframe
+
+A l'instar du modèle de régression linéaire précédent pour qui chaque match est une observation, le modèle probit considère lui un match comme 2 observations. En effet, pour chaque match il y a 2 équipes et chaque équipe à une probabilité de gagner qui est différente, ce qui implique de regarder chaque match du point de vue de l'équipe à domicile et de celui de l'équipe à l'extérieur.
+
+Nous avons donc fait un nouveau dataframe qui empille les données, ne regardant plus chaque équipe comme à domicile ou à l'extérieur, mais comme "gagne ou ne gagne pas". Cette nouvelle variable représentera notre dummy.
 
 ```{r}
 # Créer un dataframe vide pour stocker les données transformées
@@ -623,6 +625,12 @@ WC_Probit <- WC_Probit[,-c(15:20)]
 
 ```
 
+## 5.2 Estimation des modèles
+
+### 5.2.1 Modèle probit pour 1994, 1998 et 2002
+
+Les données disponibles pour ces 3 éditions de Coupe du monde sont limitées, nous estimons donc les 3 modèle à part.
+
 ```{r}
 
 #On fait notre regression logistique pour la coupe du monde 1994
@@ -634,15 +642,9 @@ model_probit_1998 <- glm(Win ~ rank + Goals + Yellow_Cards + Red_Cards, data = W
 
 #CDM 2002
 model_probit_2002 <- glm(Win ~ rank + Goals + Yellow_Cards + Red_Cards, data = WC_Probit[WC_Probit$Year == 2002,], family = binomial(link = "logit"))
-
-#Stargazer pour afficher les résultats, en spécifiant l'édition de la coupe du monde dans le nom de la colonne
-stargazer(model_probit_1994, model_probit_1998, model_probit_2002,
-          type = "text",
-          title = "Probit model for the World Cup 1994, 1998 and 2002",
-          column.labels = c("1994", "1998", "2002"),
-          dep.var.labels = "Win")
-
 ```
+
+### 5.2.2 Modèle probit pour 2006, 2010, 2014, 2018 et 2022
 
 ```{r}
 #Pour les prochaines CDM, on ajoute les variables de contrôle
@@ -720,6 +722,17 @@ model_probit_2022 <- glm(Win ~ rank +
                                na.action = na.exclude,
                                data = WC_Probit[WC_Probit$Year == 2022,],
                                family = binomial(link = "logit"))
+```
+
+## 5.3 Résultats
+
+```{r}
+#Stargazer pour afficher les résultats, en spécifiant l'édition de la coupe du monde dans le nom de la colonne
+stargazer(model_probit_1994, model_probit_1998, model_probit_2002,
+          type = "text",
+          title = "Probit model for the World Cup 1994, 1998 and 2002",
+          column.labels = c("1994", "1998", "2002"),
+          dep.var.labels = "Win")
 
 #Stargazer pour afficher les résultats en spécifiant l'édition de la coupe du monde dans le nom de la colonne
 stargazer(model_probit_2006, model_probit_2010, model_probit_2014,
@@ -734,7 +747,13 @@ stargazer(model_probit_2018, model_probit_2022,
           title = "Probit model for the World Cup 2018 and 2022",
           column.labels = c("2018", "2022"),
           dep.var.labels = "Win")
-
-
-
 ```
+Pour tous les modèles, le coefficient associé à la variable de buts marqués est positif et significatif. Cela est évident puisque le fait de marquer plus de buts augmente les chances de gagner.
+
+On observe que le coefficient associé aux variables cartons jaunes et cartons rouges n'est pas toujours significatifs. De plus, selon les éditions, il est parfois négatif parfois positif. Lorsque ce coefficient est positif, cela indique que recevoir un carton jaune ou rouge augmenterai la probabilité de gagner le match, et inversement, lorsqu'il est négatif cela indique une baisse de la probabilité de gagner le match. L'hétérogénéité du signe de ce coefficient montre que le style de jeu défensif payant (aggresif ou plutôt passif) varie selon les éditions de la Coupe du Monde.
+
+Le fait que le classement FIFA ne soit que rarement significatif montre que ce classement n'est pas un bon prédicteur fiable des résultats d'un match de Coupe du Monde. En effet, le classement FIFA est calculé de manière discrète, en utilisant une formule qui prend en compte les résultats des matches précédents la Coupe du Monde. Cela peut ne pas refléter avec précision la qualité actuelle de l'équipe ou sa capacité à gagner des matches dans une situation de Coupe du Monde particulière, qui est bien différente des différentes phases éliminatoires et autres compétitions.
+
+Les coefficients du nombre de tirs et de tirs cadrés ne sont significatifs que lors de l'édition de 2014. Cela peut être surprenant, car on pourrait penser que les équipes qui tirent plus souvent et plus précisément ont une meilleure chance de marquer des buts et donc de gagner le match. Cependant, il y a plusieurs raisons pour lesquelles ces variables peuvent ne pas être significatives dans les modèles. Tout d'abord, la précision et le nombre de tirs ne sont que des indicateurs de la performance offensive, et il est possible que d'autres facteurs, tels que la performance défensive, soient plus importants pour la victoire. En outre, la qualité des tirs (par exemple, le lieu, le moment et le contexte du tir) peut être un facteur important qui n'est pas pris en compte dans ce modèle.
+
+# 6. Conclusion
