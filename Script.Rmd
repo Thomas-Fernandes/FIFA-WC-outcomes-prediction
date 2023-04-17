@@ -529,3 +529,31 @@ stargazer(model_2006, model_2010, model_2014, model_2018, model_2022,
   Les variables de tirs cadrés et d'arrêts sont, elles, significatives et positives au seuil de 5% pour chaque édition de la Coupe du Monde. Les équipes qui ont plus de tirs cadrés ont tendance à marquer plus de buts. Cela est logique et suggère que  les équipes qui ont un jeu plus précis et qui ciblent mieux le but adverse ont une plus grande probabilité de réussir leurs attaques, ce qui vient contraster la non-significativité du coefficient associé à la variable tir. Ce n'est en effet pas parce qu'une équipe tir plus au but, qu'elle augmentera sa probabilité de marquer, au sens de notre modèle. La variable de différence d'arrêt donne la réflexion inverse de la variable tir, plus l'équipe aura un bon gardien et une défense solide, moins elle aura de chance de concéder un but.
   
   Contrairement au premier modèle, on peut considérer celui-ci comme correctement estimé. En effet, le $R²$ est en moyenne de 0.63, montrant que le modèle explique en moyenne 62% de la variance de la différence de buts. Pour l'édition 2018, le modèle explique même jusqu'à 90% de cette variation.
+
+
+# 6. Modèle probit
+
+A la différence du modèle MCO, le modeèle probit cherche à prédire une variable binaire. Les variables explicatives sont des variables continues mais la variable expliquée prend oui/non comme valeur.
+
+\begin{equation}
+Win_{t}^{i} = \alpha_{t} + \beta_{1,t} \cdot Rank_{t}^{i} + \beta_{2,t} \cdot X_{t}^{i} + \epsilon_{t}^{i}
+\end{equation}
+
+où :
+
+- $Win_{t}^{i}$ est une variable dummy qui mesure si le match i de la coupe du monde t a été gagné par l'équipe qui joue à domicile ou non.
+
+- $Rank_{t}^{i}$ est le rang de l'équipe qui joue à domicile.
+
+- $X_{t}^{i}$ est un vecteur comprenant les variables de contrôle telles que le nombre de carton jaune, le nombre de carton rouge, le nombre de tirs cadrés, etc.
+
+
+Le modèle peut se réécrire comme suit :
+
+$$ P(Win_{t}^{i}=1 | Rank_{t}^{i},X_{t}^{i}) = \Phi(\alpha + \beta_1 Rank_{t}^{i} + \beta_2 X_{t}^{i} + \epsilon_{t}^{i}) $$
+
+
+```{r}
+
+```
+
