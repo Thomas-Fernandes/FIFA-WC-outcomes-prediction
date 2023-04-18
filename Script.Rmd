@@ -8,6 +8,7 @@ output:
     toc_depth: '2'
     toc_float: true
     df_print: paged
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
@@ -29,38 +30,31 @@ library(margins)
 
 ## 1.1 Ce que dit l'article
 
-Cet article examine la prévisibilité des résultats de la Coupe du monde de football en utilisant deux modèles empiriques. Depuis 1993, le système de classement mensuel (couramment appelé coefficient des pays) de la FIFA pour les équipes nationales de football seniors est devenu une source fiable pour juger du potentiel d'une équipe dans la compétition. Cependant, l'article montre que, malgré le nombre de surprises dans les résultats des matchs, les équipes les mieux classées ont généralement de meilleures performances. Les auteurs analysent les résultats des quatre Coupes du monde de la FIFA de 1994 à 2006 et utilisent les classements mensuels de la FIFA pour évaluer les performances des équipes. Deux modèles empiriques sont proposés : un modèle de régression linéaire et un modèle probit. Le premier modèle utilise la différence de buts comme variable expliquée pour voir si les équipes les mieux classées ont généralement des meilleures performances, tandis que le second évalue la probabilité de victoire pour chaque équipe en fonction de son classement FIFA et ainsi que d'autres variables de contrôles. Les auteurs trouvent des preuves empiriques que, malgré les surprises occasionnelles, les équipes les mieux classées ont généralement de meilleures performances.
+Cet article examine la prévisibilité des résultats de la Coupe du monde de football en utilisant deux modèles empiriques. Depuis 1993, le système de classement mensuel de la FIFA (couramment appelé coefficient des pays) pour les équipes nationales de football seniors est devenu une source fiable pour juger du potentiel d'une équipe dans la compétition. Cependant, l'article montre que, malgré le nombre de surprises dans les résultats des matchs, les équipes les mieux classées ont généralement de meilleures performances. Les auteurs analysent les résultats des quatre Coupes du monde de la FIFA de 1994 à 2006 et utilisent les classements mensuels de la FIFA pour évaluer les performances des équipes. Deux modèles empiriques sont proposés : un modèle de régression linéaire et un modèle probit. Le premier modèle utilise la différence de buts comme variable expliquée pour voir si les équipes les mieux classées ont généralement des meilleures performances, tandis que le second évalue la probabilité de victoire pour chaque équipe en fonction de son classement FIFA et ainsi que d'autres variables de contrôles. Les auteurs trouvent des preuves empiriques que, malgré les surprises occasionnelles, les équipes les mieux classées ont généralement de meilleures performances.
 
 ## 1.2 Ce qu'on cherche à faire
 
-L'objectif de cette étude est de répliquer les résultats de l'article en utilisant les mêmes données que les auteurs, ainsi que d'autres plus récentes. Bien que le modèle probit et le modèle MCO proposés dans l'article soient reproductibles, certaines variables de contrôle utilisées par les auteurs ne sont pas disponibles pour la période de 2006 à 2022 — C'est le cas du nombre de corners ainsi que du nombre d'arrêt pour 2022. Nous avons ainsi remplacé ces variables par d'autres indicateurs pertinents tout en y ajoutant des nouveaux, tels que le nombre de changement effectué par chaque équipe, le nombre de tirs en plus du nombre de tirs cadrés, ainsi que le nombre d'arrêts. En utilisant ces variables alternatives, nous examinons si les conclusions de l'article original peuvent être étendues à une période plus récente de la Coupe du monde de football. Nous testons également la validité de la méthode de classement de la FIFA et de son utilisation comme proxy pour la performance des équipes.
+L'objectif de cette étude est de répliquer les résultats de l'article en utilisant les mêmes données que les auteurs, ainsi que des données plus récentes. Cependant, certaines variables de contrôle utilisées dans l'article original ne sont pas disponibles pour la période de 2006 à 2022, telles que le nombre de corners et le nombre d'arrêts pour 2022.Ainsi, afin de pallier à cette lacune, nous avons sélectionné d'autres indicateurs pertinents pour les remplacer, tout en ajoutant de nouveaux, tels que le nombre de changements effectués par chaque équipe, le nombre total de tirs en plus du nombre de tirs cadrés, ainsi que le nombre d'arrêts. En utilisant ces variables alternatives, nous avons cherché à savoir si les conclusions de l'article original pouvaient être étendues à une période plus récente de la Coupe du monde de football. Nous avons également mis à l'épreuve la validité de la méthode de classement de la FIFA et de son utilisation en tant que proxy pour la performance des équipes.
 
 # 2. Traitement des données
 
 Les données liées aux coupes du monde n'étant officiellement plus disponible gratuitement sur le site de la FIFA, il faut se baser sur des données d'utilisateurs qui ont scrap le site de la FIFA dans l'objectif de répliquer ces bases de données.
 
 Classement FIFA : https://www.kaggle.com/datasets/cashncarry/fifaworldranking — Alex Zabrodin
-                  Ces données comprennent le classement fifa de 1992 (date de création) à nos jours.
-
-Affluence  : https://www.kaggle.com/datasets/abecklas/fifa-world-cup — Andre Becklas
-             Détails des affluences ainsi que des scores des matchs de coupe du monde de 1a première en 1930 à celle de 2014
+                  Ces données comprennent le classement fifa de 1992 (date de création) à nos jours
 
 Coupe du monde 2022 : https://www.kaggle.com/datasets/die9origephit/fifa-world-cup-2022-complete-dataset — Diego Farchione
                       Database complète de toutes les statistiques de chaque match de la coupe du monde 2022
-
-Matchs : https://github.com/jfjelstul/worldcup — Josh Fjelstul
-         Base de données comprenant les scores de tous les matchs de coupe du monde de sa créaion à nos jours
          
-All : https://www.kaggle.com/datasets/piterfm/fifa-football-world-cup — Petro Ivaniuk
-      Base de données complète reprenant les contenant le score de tous les matchs de coupe du monde (1930-2022), les cartons (jaunes et rouges), l'affluence
+Matchs : https://www.kaggle.com/datasets/piterfm/fifa-football-world-cup — Petro Ivaniuk
+      Base de données complète reprenant les contenant le score de tous les matchs de coupe du monde (1930-2022), les cartons (jaunes et rouges) et l'affluence
       
-ALL2: https://www.kaggle.com/datasets/kaito510/fifa-world-cup-match-stats  — Kaito G.
-      Contient les données de possession de balle, carton, tir cadrés de 2001 à 2021.
+Matchs_stats: https://www.kaggle.com/datasets/kaito510/fifa-world-cup-match-stats — Kaito G.
+      Contient les données de possession de balle, carton, tir cadrés de 2001 à 2021
 
 ## 2.1 Traitement des données de match
 
 ```{r}
-#On importe ce csv
 WC_matches <- read.csv("WC Data/matches_1930_2022 (All).csv",
                     header = TRUE,
                     sep = ",",
@@ -72,56 +66,35 @@ WC_matches <- WC_matches[c("home_team", "away_team", "home_score",
                            "home_yellow_card_long", "away_yellow_card_long",
                            "home_substitute_in_long", "away_substitute_in_long")]
 
-#On renomme les colonnes
+#Renomme les colonnes
 colnames(WC_matches) <- c("Home", "Away", "Home.Goals", "Away.Goals",
                           "Attendance", "Round", "Year", "Home.Red.Card",
                           "Away.Red.Card", "Home.Yellow.Card",
                           "Away.Yellow.Card", "Home.Substitute.In",
                           "Away.Substitute.In")
 
-#On ajoute une colonne de différence de buts
-WC_matches$Goals_Diff <- WC_matches$Home.Goals - WC_matches$Away.Goals
-
-#Home Red Card Count
-WC_matches$Home.Red.Card.Count <- sapply(strsplit(WC_matches$Home.Red.Card, "\\|"), function(x) length(x))
-
-#Away Red Card Count
-WC_matches$Away.Red.Card.Count <- sapply(strsplit(WC_matches$Away.Red.Card, "\\|"), function(x) length(x))
-
-#Red card diff
-WC_matches$Red.Card.Diff <- WC_matches$Home.Red.Card.Count - WC_matches$Away.Red.Card.Count
-
-#Home Yellow Card Count
+#On extrait les variables de contrôles des string, et on créé les variables en différence
+WC_matches$Goals_Diff             <- WC_matches$Home.Goals - WC_matches$Away.Goals
+WC_matches$Home.Red.Card.Count    <- sapply(strsplit(WC_matches$Home.Red.Card, "\\|"), function(x) length(x))
+WC_matches$Away.Red.Card.Count    <- sapply(strsplit(WC_matches$Away.Red.Card, "\\|"), function(x) length(x))
+WC_matches$Red.Card.Diff          <- WC_matches$Home.Red.Card.Count - WC_matches$Away.Red.Card.Count
 WC_matches$Home.Yellow.Card.Count <- sapply(strsplit(WC_matches$Home.Yellow.Card, ","), function(x) length(x))
-
-#Away Yellow Card Count
 WC_matches$Away.Yellow.Card.Count <- sapply(strsplit(WC_matches$Away.Yellow.Card, ","), function(x) length(x))
+WC_matches$Yellow.Card.Diff       <- WC_matches$Home.Yellow.Card.Count - WC_matches$Away.Yellow.Card.Count
+WC_matches$Home.Substitution.Count<- sapply(strsplit(WC_matches$Home.Substitute.In, ","), function(x) length(x))
+WC_matches$Away.Substitution.Count<- sapply(strsplit(WC_matches$Away.Substitute.In, ","), function(x) length(x))
+WC_matches$Substitution.Diff      <- WC_matches$Home.Substitution.Count - WC_matches$Away.Substitution.Count
 
-#Yellow card diff
-WC_matches$Yellow.Card.Diff <- WC_matches$Home.Yellow.Card.Count - WC_matches$Away.Yellow.Card.Count
-
-#Home Substitute In Count
-WC_matches$Home.Substitution.Count <- sapply(strsplit(WC_matches$Home.Substitute.In, ","), function(x) length(x))
-
-#Away Substitute In Count
-WC_matches$Away.Substitution.Count <- sapply(strsplit(WC_matches$Away.Substitute.In, ","), function(x) length(x))
-
-#Substitution diff
-WC_matches$Substitution.Diff <- WC_matches$Home.Substitution.Count - WC_matches$Away.Substitution.Count
-
-#On renomme WC_matches en WC_database
 WC_database <- WC_matches
-
-#On ne garde que les données après 1994
 WC_database <- subset(WC_database, Year >= 1994)
 
-#On supprime les colonnes Home.Red.Card, Away.Red.Card, Home.Yellow.Card, Away.Yellow.Card, Home.Substitute.In, Away.Substitute.In, en utilisant leur nom
+#Suppression des colonnes inutiles
 WC_database <- WC_database[,-c(8,9,10,11,12, 13)]
 ```
 
 ## 2.2 Traitement des données de match supplémentaires
 
-Pour les matchs les plus récents (à partir de la cdm 2014), nous avons des données supplémentaires sur la possession de balle, le nombre de tir, de tir cadré, de fautes et d'arrêt
+Pour les matchs les plus récents (à partir de la Coupe du Monde 2014), nous avons des données supplémentaires sur la possession de balle, le nombre de tir, de tir cadré, de fautes et d'arrêt : nos variables de contrôle.
 
 ```{r}
 WC_matches_stats <- read.csv("WC Data/FIFAallMatchBoxData (Possesion 2001-2021).csv",
@@ -130,26 +103,24 @@ WC_matches_stats <- read.csv("WC Data/FIFAallMatchBoxData (Possesion 2001-2021).
                     stringsAsFactors = FALSE)
 
 #On ne garde que les années de coupe du monde
-WC_matches_stats <- subset(WC_matches_stats, year %in% c(2006,
-                                                         2010, 2014, 2018, 2022))
+WC_matches_stats <- subset(WC_matches_stats, year %in% c(2006, 2010,
+                                                         2014, 2018, 2022))
 
-#Rename south korea as korea republic
+#Uniformisation des noms de pays
 WC_matches_stats <- WC_matches_stats %>% 
   mutate(hname = ifelse(hname == "South Korea", "Korea Republic", hname))
 WC_matches_stats <- WC_matches_stats %>%
   mutate(aname = ifelse(aname == "South Korea", "Korea Republic", aname))
-#Ivory Coast as Côte d'Ivoire
 WC_matches_stats <- WC_matches_stats %>% 
   mutate(hname = ifelse(hname == "Ivory Coast", "Côte d'Ivoire", hname))
 WC_matches_stats <- WC_matches_stats %>%
   mutate(aname = ifelse(aname == "Ivory Coast", "Côte d'Ivoire", aname))
-#Serbia & Montenegro as Serbia and Montenegro
 WC_matches_stats <- WC_matches_stats %>% 
   mutate(hname = ifelse(hname == "Serbia & Montenegro", "Serbia and Montenegro", hname))
 WC_matches_stats <- WC_matches_stats %>%
   mutate(aname = ifelse(aname == "Serbia & Montenegro", "Serbia and Montenegro", aname))
 
-#On ajoute les différences des nouvelles stats
+#Ajout des différences pour les nouvelles statistiques
 WC_matches_stats <- WC_matches_stats %>% 
   mutate(Possession.Diff = hPossesion - aPossesion)
 WC_matches_stats <- WC_matches_stats %>% 
@@ -161,29 +132,25 @@ WC_matches_stats <- WC_matches_stats %>%
 WC_matches_stats <- WC_matches_stats %>% 
       mutate(Saves.Diff = hsaves - asaves)
 
-# Merge des dataframes WC_matches_stats et WC_database en conservant toutes les observations de WC_database (all.x = TRUE pour ensuite ajouter les données de 2022)
-WC_database_2 <- merge(WC_database, WC_matches_stats, by.x = c("Home", "Away", "Year"), by.y = c("hname", "aname", "year"), all.x = TRUE)
+#Jointure de toutes les données dans le dataframe
+WC_database_2 <- merge(WC_database, WC_matches_stats, 
+                       by.x = c("Home", "Away", "Year"),
+                       by.y = c("hname", "aname", "year"),
+                       all.x = TRUE)
 WC_database <- WC_database_2
-
-# Supprimer le dataframe temporaire
 rm(WC_database_2)
 
 
-#On enlève les colonnes qui sont doublées
-WC_database <- subset(WC_database, select = -c(hgoals,
-                                               agoals,
-                                               hyellowCards,
-                                               ayellowCards,
-                                               hredCards,
-                                               aredCards))
+#Suppression des colonnes en double
+WC_database <- subset(WC_database, select = -c(hgoals, agoals, hyellowCards,
+                                               ayellowCards, hredCards, aredCards))
 ```
 
 ## 2.3 Traitement des données de la coupe du monde 2022
 
-Les données de la dernière coupe du monde ne sont pas incluses dans les base de données précédemment utilisé. On va donc se servir d'une nouvelle base de données et la même autre même format que WC_database pour pouvoir ensuite merge les deux.
+Les données de la dernière coupe du monde ne sont pas incluses dans les base de données précédemment utilisées. On va donc se servir d'une nouvelle base de données et la mettre au même format que WC_database pour pouvoir ensuite faire une jointure sur les deux.
 
 ```{r}
-#On importe le csv : "WC Data/Fifa_world_cup_matches_2022 (Cards).csv"
 WC_matches_2022 <- read.csv("WC Data/Fifa_world_cup_matches_2022 (Cards).csv",
                     header = TRUE,
                     sep = ",",
@@ -192,65 +159,52 @@ WC_matches_2022 <- read.csv("WC Data/Fifa_world_cup_matches_2022 (Cards).csv",
 #On ajoute une colonne Year pour pouvoir merge avec les autres données
 WC_matches_2022$Year <- 2022
 
-#On ajoute une colonne de différence de buts
-WC_matches_2022$Goals_Diff <- WC_matches_2022$number.of.goals.team1 - WC_matches_2022$number.of.goals.team2
-
-#On ajoute une colonne de différence de cartons jaunes
+#Colonnes de différence
+WC_matches_2022$Goals_Diff       <- WC_matches_2022$number.of.goals.team1 - WC_matches_2022$number.of.goals.team2
 WC_matches_2022$Yellow_Card_Diff <- WC_matches_2022$yellow.cards.team1 - WC_matches_2022$yellow.cards.team2
+WC_matches_2022$Red_Card_Diff    <- WC_matches_2022$red.cards.team1 - WC_matches_2022$red.cards.team2
 
-#On ajoute une colonne de différence de cartons rouges
-WC_matches_2022$Red_Card_Diff <- WC_matches_2022$red.cards.team1 - WC_matches_2022$red.cards.team2
-
-#On ajoute une colonne de différence de remplacements~
-#Il n'y en a pas dans la base de données
-
-#On ajoute une colonne de différence de possession de balle
-#Il faut d'abord supprimer le % de la colonne
 WC_matches_2022$possession.team1 <- gsub("%", "", WC_matches_2022$possession.team1)
 WC_matches_2022$possession.team2 <- gsub("%", "", WC_matches_2022$possession.team2)
 WC_matches_2022$possession.team1 <- as.numeric(WC_matches_2022$possession.team1)
 WC_matches_2022$possession.team2 <- as.numeric(WC_matches_2022$possession.team2)
-WC_matches_2022$Possession.Diff <- WC_matches_2022$possession.team1 - WC_matches_2022$possession.team2
+WC_matches_2022$Possession.Diff  <- WC_matches_2022$possession.team1 - WC_matches_2022$possession.team2
 
-#On ajoute une colonne de différence de tir (total.attacks.team1)
-WC_matches_2022$Shots.Diff <- WC_matches_2022$total.attempts.team1 - WC_matches_2022$total.attempts.team2
-
-#On ajoute une colonne de différence de tir cadré (on.target.attempts.team1)
+WC_matches_2022$Shots.Diff       <- WC_matches_2022$total.attempts.team1 - WC_matches_2022$total.attempts.team2
 WC_matches_2022$Shots.On.Target.Diff <- WC_matches_2022$on.target.attempts.team1 - WC_matches_2022$on.target.attempts.team2
 
-#Les colonnes fouls sont en "against" et non "committed by" donc on les renomme
+#Les colonnes fouls sont en "against" et non "committed by", on renomme pour inverser
 names(WC_matches_2022)[names(WC_matches_2022) == "fouls.against.team1"] <- "fouls.team1"
 names(WC_matches_2022)[names(WC_matches_2022) == "fouls.against.team2"] <- "fouls.team2"
-
-#On ajoute une colonne de différence de fautes
 WC_matches_2022$Fouls.Diff <- WC_matches_2022$fouls.team1 - WC_matches_2022$fouls.team2
 
-#On garde que les colonnes qui nous intéressent
+
+#Suppression des colonnes inutiles
 WC_matches_2022_22 <- subset(WC_matches_2022, select = c(1:7, 11, 12, 21, 22, 57:62, 89:96))
 
-#On renomme iran en ir iran avec mutate
+#Uniformisation des nom de pays
 WC_matches_2022_22 <- WC_matches_2022_22 %>% 
   mutate(team1 = ifelse(team1 == "IRAN", "IR IRAN", team1))
 WC_matches_2022_22 <- WC_matches_2022_22 %>%
   mutate(team2 = ifelse(team2 == "IRAN", "IR IRAN", team2))
 
 #On renomme les colonnes pour qu'elles soient identiques à celles de WC_database
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "team1"] <- "Home"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "team2"] <- "Away"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "team1"]                 <- "Home"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "team2"]                 <- "Away"
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "number.of.goals.team1"] <- "Home.Goals"
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "number.of.goals.team2"] <- "Away.Goals"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "yellow.cards.team1"] <- "Home.Yellow.Card.Count"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "yellow.cards.team2"] <- "Away.Yellow.Card.Count"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "red.cards.team1"] <- "Home.Red.Card.Count"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "red.cards.team2"] <- "Away.Red.Card.Count"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "total.attempts.team1"] <- "hshots"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "total.attempts.team2"] <- "ashots"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "yellow.cards.team1"]    <- "Home.Yellow.Card.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "yellow.cards.team2"]    <- "Away.Yellow.Card.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "red.cards.team1"]       <- "Home.Red.Card.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "red.cards.team2"]       <- "Away.Red.Card.Count"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "total.attempts.team1"]  <- "hshots"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "total.attempts.team2"]  <- "ashots"
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "on.target.attempts.team1"] <- "hshotsOnTarget"
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "on.target.attempts.team2"] <- "ashotsOnTarget"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "fouls.team1"] <- "hfouls"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "fouls.team2"] <- "afouls"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "possession.team1"] <- "hPossession"
-names(WC_matches_2022_22)[names(WC_matches_2022_22) == "possession.team2"] <- "aPossession"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "fouls.team1"]           <- "hfouls"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "fouls.team2"]           <- "afouls"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "possession.team1"]      <- "hPossession"
+names(WC_matches_2022_22)[names(WC_matches_2022_22) == "possession.team2"]      <- "aPossession"
 
 #On va maintenant cherche à faire une base de données avec les données de la Coupe du Monde 2022 et les données de la base de données WC_database
 
@@ -269,27 +223,27 @@ for (i in 1:nrow(WC_database)) {
   if (is.na(WC_database$hshots[i]) && WC_database$Year[i] == 2022) {
     home_team <- WC_database$Home[i]
     away_team <- WC_database$Away[i]
-    year <- WC_database$Year[i]
+    year      <- WC_database$Year[i]
     matching_row <- match(paste(home_team, away_team, year),
                           paste(WC_matches_2022_22$Home, WC_matches_2022_22$Away, WC_matches_2022_22$Year))
-    WC_database$hshots[i] <- WC_matches_2022_22$hshots[matching_row]
-    WC_database$ashots[i] <- WC_matches_2022_22$ashots[matching_row]
-    WC_database$hPossesion[i] <- WC_matches_2022_22$hPossession[matching_row]
-    WC_database$aPossesion[i] <- WC_matches_2022_22$aPossession[matching_row]
-    WC_database$hshotsOnTarget[i] <- WC_matches_2022_22$hshotsOnTarget[matching_row]
-    WC_database$ashotsOnTarget[i] <- WC_matches_2022_22$ashotsOnTarget[matching_row]
-    WC_database$hfouls[i] <- WC_matches_2022_22$hfouls[matching_row]
-    WC_database$afouls[i] <- WC_matches_2022_22$afouls[matching_row]
+    WC_database$hshots[i]                 <- WC_matches_2022_22$hshots[matching_row]
+    WC_database$ashots[i]                 <- WC_matches_2022_22$ashots[matching_row]
+    WC_database$hPossesion[i]             <- WC_matches_2022_22$hPossession[matching_row]
+    WC_database$aPossesion[i]             <- WC_matches_2022_22$aPossession[matching_row]
+    WC_database$hshotsOnTarget[i]         <- WC_matches_2022_22$hshotsOnTarget[matching_row]
+    WC_database$ashotsOnTarget[i]         <- WC_matches_2022_22$ashotsOnTarget[matching_row]
+    WC_database$hfouls[i]                 <- WC_matches_2022_22$hfouls[matching_row]
+    WC_database$afouls[i]                 <- WC_matches_2022_22$afouls[matching_row]
     WC_database$Home.Yellow.Card.Count[i] <- WC_matches_2022_22$Home.Yellow.Card.Count[matching_row]
     WC_database$Away.Yellow.Card.Count[i] <- WC_matches_2022_22$Away.Yellow.Card.Count[matching_row]
-    WC_database$Home.Red.Card.Count[i] <- WC_matches_2022_22$Home.Red.Card.Count[matching_row]
-    WC_database$Away.Red.Card.Count[i] <- WC_matches_2022_22$Away.Red.Card.Count[matching_row]
-    WC_database$Possession.Diff[i] <- WC_matches_2022_22$Possession.Diff[matching_row]
-    WC_database$Shots.Diff[i] <- WC_matches_2022_22$Shots.Diff[matching_row]
-    WC_database$Shots.On.Target.Diff[i] <- WC_matches_2022_22$Shots.On.Target.Diff[matching_row]
-    WC_database$Fouls.Diff[i] <- WC_matches_2022_22$Fouls.Diff[matching_row]
-    WC_database$Yellow.Cards.Diff[i] <- WC_matches_2022_22$Yellow.Cards.Diff[matching_row]
-    WC_database$Red.Cards.Diff[i] <- WC_matches_2022_22$Red.Cards.Diff[matching_row]
+    WC_database$Home.Red.Card.Count[i]    <- WC_matches_2022_22$Home.Red.Card.Count[matching_row]
+    WC_database$Away.Red.Card.Count[i]    <- WC_matches_2022_22$Away.Red.Card.Count[matching_row]
+    WC_database$Possession.Diff[i]        <- WC_matches_2022_22$Possession.Diff[matching_row]
+    WC_database$Shots.Diff[i]             <- WC_matches_2022_22$Shots.Diff[matching_row]
+    WC_database$Shots.On.Target.Diff[i]   <- WC_matches_2022_22$Shots.On.Target.Diff[matching_row]
+    WC_database$Fouls.Diff[i]             <- WC_matches_2022_22$Fouls.Diff[matching_row]
+    WC_database$Yellow.Cards.Diff[i]      <- WC_matches_2022_22$Yellow.Cards.Diff[matching_row]
+    WC_database$Red.Cards.Diff[i]         <- WC_matches_2022_22$Red.Cards.Diff[matching_row]
   }
 }
 
@@ -302,37 +256,34 @@ WC_database$Home.Win <- ifelse(WC_database$Goals_Diff > 0, 1, 0)
 ## 2.4 Traitement du classement FIFA
 
 ```{r}
-#On importe le deuxième csv : "fifa_ranking-2022-12-22 (Rank)"
 FIFA_rank <- read.csv("WC Data/fifa_ranking-2022-12-22 (Rank).csv",
                     header = TRUE,
                     sep = ",",
                     stringsAsFactors = FALSE)
 
-#On garde uniquement les classements datés au mois de mai de chaque année et on ajoute une nouvelle colonne pour l'année correspondante
-FIFA_rank <- subset(FIFA_rank, ifelse(year(FIFA_rank$rank_date) == 2022, month(FIFA_rank$rank_date) == 10, month(FIFA_rank$rank_date) == 5))
+#On garde les dates d'un mois avant chaque Coupe du Monde
+FIFA_rank <- subset(FIFA_rank,
+                    ifelse(year(FIFA_rank$rank_date) == 2022, 
+                    month(FIFA_rank$rank_date) == 10,
+                    month(FIFA_rank$rank_date) == 5))
 FIFA_rank$rank_date <- as.Date(FIFA_rank$rank_date)
-FIFA_rank$Year <- format(FIFA_rank$rank_date, "%Y")
+FIFA_rank$Year      <- format(FIFA_rank$rank_date, "%Y")
 
 #On ne garde que les années de la Coupe du Monde
 FIFA_rank <- subset(FIFA_rank,year(FIFA_rank$rank_date) %in% c(1994, 1998, 2002, 2006,
                                                                2010, 2014, 2018, 2022))
 
-#On renomme les entrées de "country_full" USA en "United States" pour le merge
+#Uniformisation des noms de pays
 FIFA_rank$country_full <- gsub("USA", "United States", FIFA_rank$country_full)
-#Turkey en Türkiye
 FIFA_rank$country_full <- gsub("Turkey", "Türkiye", FIFA_rank$country_full)
-#Yugoslavia en fr Yugoslavia
 FIFA_rank$country_full <- gsub("Yugoslavia", "fr Yugoslavia", FIFA_rank$country_full)
 
-#Colonne Year en numérique
-FIFA_rank$Year <- as.integer(FIFA_rank$Year)
-FIFA_rank$country_full <- tolower(FIFA_rank$country_full)
-
-#On ajoute les colonnes "FIFA_Rank.Home" et "FIFA_Rank.Away" dans le dataframe "WC_database"
+FIFA_rank$Year              <- as.integer(FIFA_rank$Year)
+FIFA_rank$country_full      <- tolower(FIFA_rank$country_full)
 WC_database$FIFA_Rank.Home <- 0
 WC_database$FIFA_Rank.Away <- 0
 
-#Fonction qui récupère le classement FIFA d'une équipe à une année donnée
+#Fonction qui récupère le classement FIFA d'une équipe pour une année donnée
 get_rank <- function(year, team){
   rank <- FIFA_rank$rank[which(FIFA_rank$country_full == team & FIFA_rank$Year == year)]
   if(length(rank) > 0){
@@ -342,13 +293,13 @@ get_rank <- function(year, team){
   }
 }
 
-#On ajoute les classements FIFA dans le dataframe "WC_database"
+#Ajout des classements FIFA dans le dataframe "WC_database"
 for (i in 1:nrow(WC_database)) {
   WC_database$FIFA_Rank.Home[i] <- get_rank(WC_database$Year[i], WC_database$Home[i])
   WC_database$FIFA_Rank.Away[i] <- get_rank(WC_database$Year[i], WC_database$Away[i])
 }
 
-#On ajoute la colonne "FIFA_Rank.Diff" dans le dataframe "WC_database"
+#Colonne de différence
 WC_database$FIFA_Rank.Diff <- WC_database$FIFA_Rank.Home - WC_database$FIFA_Rank.Away
 ```
 
@@ -371,16 +322,21 @@ WC_2022 <- subset(WC_database, Year == 2022)
 ## 3.1 Moyenne de buts par match
 
 ```{r}
-#On plot la moyenne de but marqués par une équipe à domicile et à l'extérieur pour chaque année de la Coupe du monde. En absisse, on a l'année de la Coupe du monde et en ordonnée, le nombre de but marqués. On utilise plotly pour avoir un graphique interactif.
 plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
-                y = c(mean(WC_1994$Home.Goals), mean(WC_1998$Home.Goals), mean(WC_2002$Home.Goals), mean(WC_2006$Home.Goals), mean(WC_2010$Home.Goals), mean(WC_2014$Home.Goals), mean(WC_2018$Home.Goals), mean(WC_2022$Home.Goals)),
+                y = c(mean(WC_1994$Home.Goals), mean(WC_1998$Home.Goals),
+                      mean(WC_2002$Home.Goals), mean(WC_2006$Home.Goals),
+                      mean(WC_2010$Home.Goals), mean(WC_2014$Home.Goals),
+                      mean(WC_2018$Home.Goals), mean(WC_2022$Home.Goals)),
                 type = "bar",
                 name = "Home Goals") %>%
-  add_trace(y = c(mean(WC_1994$Away.Goals), mean(WC_1998$Away.Goals), mean(WC_2002$Away.Goals), mean(WC_2006$Away.Goals), mean(WC_2010$Away.Goals), mean(WC_2014$Away.Goals), mean(WC_2018$Away.Goals), mean(WC_2022$Away.Goals)),
-            name = "Away Goals") %>%
-  layout(title = "Moyenne de buts par match",
-         xaxis = list(title = "Year"),
-         yaxis = list(title = "Goals"))
+      add_trace(y = c(mean(WC_1994$Away.Goals), mean(WC_1998$Away.Goals),
+                  mean(WC_2002$Away.Goals), mean(WC_2006$Away.Goals),
+                  mean(WC_2010$Away.Goals), mean(WC_2014$Away.Goals),
+                  mean(WC_2018$Away.Goals), mean(WC_2022$Away.Goals)),
+                name = "Away Goals") %>%
+      layout(title = "Moyenne de buts par match",
+                xaxis = list(title = "Year"),
+                yaxis = list(title = "Goals"))
 ```
 
 Nous constatons une stabilité de la moyenne de buts marqués au fil des différentes éditions de la Coupe du Monde. Par ailleurs, nous remarquons que la moyenne de buts marqués à domicile est légèrement supérieure à celle à l'extérieur, bien que le choix de l'équipe à domicile et à l'extérieur soit déterminé par un tirage au sort.
@@ -388,29 +344,33 @@ Nous constatons une stabilité de la moyenne de buts marqués au fil des différ
 ## 3.2 Moyenne de carton jaune et rouge par match
 
 ```{r}
-#On plot la moyenne de carton jaune par match pour chaque année de la Coupe du monde. En absisse, on a l'année de la Coupe du monde et en ordonnée, le nombre de carton jaune. On utilise plotly pour avoir un graphique interactif.
 plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
-                y = c(mean(WC_1994$Home.Yellow.Card.Count), mean(WC_1998$Home.Yellow.Card.Count), mean(WC_2002$Home.Yellow.Card.Count), mean(WC_2006$Home.Yellow.Card.Count), mean(WC_2010$Home.Yellow.Card.Count), mean(WC_2014$Home.Yellow.Card.Count), mean(WC_2018$Home.Yellow.Card.Count), mean(WC_2022$Home.Yellow.Card.Count)),
+                y = c(mean(WC_1994$Home.Yellow.Card.Count), mean(WC_1998$Home.Yellow.Card.Count),
+                      mean(WC_2002$Home.Yellow.Card.Count), mean(WC_2006$Home.Yellow.Card.Count),
+                      mean(WC_2010$Home.Yellow.Card.Count), mean(WC_2014$Home.Yellow.Card.Count),
+                      mean(WC_2018$Home.Yellow.Card.Count), mean(WC_2022$Home.Yellow.Card.Count)),
                 type = "bar",
                 name = "Home Yellow Cards") %>%
-  add_trace(y = c(mean(WC_1994$Away.Yellow.Card.Count), mean(WC_1998$Away.Yellow.Card.Count), mean(WC_2002$Away.Yellow.Card.Count), mean(WC_2006$Away.Yellow.Card.Count), mean(WC_2010$Away.Yellow.Card.Count), mean(WC_2014$Away.Yellow.Card.Count), mean(WC_2018$Away.Yellow.Card.Count), mean(WC_2022$Away.Yellow.Card.Count)),
-            name = "Away Yellow Cards") %>%
-  layout(title = "Moyenne de carton jaune par match",
-         xaxis = list(title = "Year"),
-         yaxis = list(title = "Yellow Cards"))
+      add_trace(y = c(mean(WC_1994$Away.Yellow.Card.Count), mean(WC_1998$Away.Yellow.Card.Count), mean(WC_2002$Away.Yellow.Card.Count), mean(WC_2006$Away.Yellow.Card.Count), mean(WC_2010$Away.Yellow.Card.Count), mean(WC_2014$Away.Yellow.Card.Count), mean(WC_2018$Away.Yellow.Card.Count), mean(WC_2022$Away.Yellow.Card.Count)),
+                name = "Away Yellow Cards") %>%
+      layout(title = "Moyenne de carton jaune par match",
+                xaxis = list(title = "Year"),
+                yaxis = list(title = "Yellow Cards"))
 ```
 
 ```{r}
-#On plot la moyenne de carton rouge par match pour chaque année de la Coupe du monde. En absisse, on a l'année de la Coupe du monde et en ordonnée, le nombre de carton rouge. On utilise plotly pour avoir un graphique interactif.
 plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
-                y = c(mean(WC_1994$Home.Red.Card.Count), mean(WC_1998$Home.Red.Card.Count), mean(WC_2002$Home.Red.Card.Count), mean(WC_2006$Home.Red.Card.Count), mean(WC_2010$Home.Red.Card.Count), mean(WC_2014$Home.Red.Card.Count), mean(WC_2018$Home.Red.Card.Count), mean(WC_2022$Home.Red.Card.Count)),
+                y = c(mean(WC_1994$Home.Red.Card.Count), mean(WC_1998$Home.Red.Card.Count),
+                      mean(WC_2002$Home.Red.Card.Count), mean(WC_2006$Home.Red.Card.Count),
+                      mean(WC_2010$Home.Red.Card.Count), mean(WC_2014$Home.Red.Card.Count),
+                      mean(WC_2018$Home.Red.Card.Count), mean(WC_2022$Home.Red.Card.Count)),
                 type = "bar",
                 name = "Home Red Cards") %>%
-  add_trace(y = c(mean(WC_1994$Away.Red.Card.Count), mean(WC_1998$Away.Red.Card.Count), mean(WC_2002$Away.Red.Card.Count), mean(WC_2006$Away.Red.Card.Count), mean(WC_2010$Away.Red.Card.Count), mean(WC_2014$Away.Red.Card.Count), mean(WC_2018$Away.Red.Card.Count), mean(WC_2022$Away.Red.Card.Count)),
-            name = "Away Red Cards") %>%
-  layout(title = "Moyenne de carton rouge par match",
-         xaxis = list(title = "Year"),
-         yaxis = list(title = "Red Cards"))
+      add_trace(y = c(mean(WC_1994$Away.Red.Card.Count), mean(WC_1998$Away.Red.Card.Count), mean(WC_2002$Away.Red.Card.Count), mean(WC_2006$Away.Red.Card.Count), mean(WC_2010$Away.Red.Card.Count), mean(WC_2014$Away.Red.Card.Count), mean(WC_2018$Away.Red.Card.Count), mean(WC_2022$Away.Red.Card.Count)),
+                name = "Away Red Cards") %>%
+      layout(title = "Moyenne de carton rouge par match",
+                xaxis = list(title = "Year"),
+                yaxis = list(title = "Red Cards"))
 ```
 
 Nous pouvons observer une diminution du nombre de cartons jaunes et rouges par match au fil des années de la Coupe du Monde. Cette tendance peut être expliquée par une possible évolution dans la sévérité des arbitres, qui pourraient être de moins en moins stricts dans leur distribution de cartons, ou par une amélioration du comportement disciplinaire des joueurs, notamment depuis l'introduction de la VAR qui permet de mieux contrôler les fautes commises.
@@ -429,23 +389,44 @@ On divise les différentes Coupes du Monde en deux sous ensemble : 1994, 1998 et
 
 ```{r}
 #Groupe 1
-model_1994 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Attendance, data = WC_1994)
-model_1998 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Attendance, data = WC_1998)
-model_2002 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Attendance, data = WC_2002)
+model_1994 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff +
+                              Red.Card.Diff  + Attendance,
+                              data = WC_1994)
+model_1998 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff +
+                              Red.Card.Diff  + Attendance,
+                              data = WC_1998)
+model_2002 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff +
+                              Red.Card.Diff  + Attendance,
+                              data = WC_2002)
 
 #Groupe 2
-model_2006 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Saves.Diff + Attendance, data = WC_2006)
-model_2010 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Saves.Diff + Attendance, data = WC_2010)
-model_2014 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Saves.Diff + Attendance, data = WC_2014)
-model_2018 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Saves.Diff + Attendance, data = WC_2018)
-model_2022 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff + Fouls.Diff + Possession.Diff + Shots.Diff + Shots.On.Target.Diff + Attendance, data = WC_2022)
+model_2006 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff +
+                              Fouls.Diff     + Possession.Diff  + Shots.Diff    +
+                              Shots.On.Target.Diff + Saves.Diff + Attendance,
+                              data = WC_2006)
+model_2010 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff +
+                              Fouls.Diff     + Possession.Diff  + Shots.Diff    +
+                              Shots.On.Target.Diff + Saves.Diff + Attendance,
+                              data = WC_2010)
+model_2014 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff +
+                              Fouls.Diff     + Possession.Diff  + Shots.Diff    +
+                              Shots.On.Target.Diff + Saves.Diff + Attendance,
+                              data = WC_2014)
+model_2018 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff +
+                              Fouls.Diff     + Possession.Diff  + Shots.Diff    +
+                              Shots.On.Target.Diff + Saves.Diff + Attendance,
+                              data = WC_2018)
+model_2022 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff +
+                              Fouls.Diff     + Possession.Diff  + Shots.Diff    +
+                              Shots.On.Target.Diff + Attendance,
+                              data = WC_2022)
 
 ```
 
 ## 4.2 Tests d'hétéroscédasticité, d'autocorrelation et de multicolinéarité
   
 ```{r}
-#On vérifie que les résidus ne sont pas héteroscedastiques avec le test de Breusch-Pagan
+#Test de Breusch-Pagan (hétéroscédasticité)
 bp_1994 <- bptest(model_1994)
 bp_1998 <- bptest(model_1998)
 bp_2002 <- bptest(model_2002)
@@ -455,7 +436,7 @@ bp_2014 <- bptest(model_2014)
 bp_2018 <- bptest(model_2018)
 bp_2022 <- bptest(model_2022)
 
-#On vérifie que les résidus ne sont pas autocorrélés avec le test de Durbin-Watson
+#Test de Durbin-Watson (autocorrelation)
 dw_1994 <- dwtest(model_1994)$p.value[1]
 dw_1998 <- dwtest(model_1998)$p.value[1]
 dw_2002 <- dwtest(model_2002)$p.value[1]
@@ -465,7 +446,7 @@ dw_2014 <- dwtest(model_2014)$p.value[1]
 dw_2018 <- dwtest(model_2018)$p.value[1]
 dw_2022 <- dwtest(model_2022)$p.value[1]
 
-#On vérifie qu'il n'y pas de multicollinéarité avec le test de variance inflation factor
+#Test VIF (multicolinéarité)
 vif_1994 <- vif(model_1994)[1]
 vif_1998 <- vif(model_1998)[1]
 vif_2002 <- vif(model_2002)[1]
@@ -475,11 +456,17 @@ vif_2014 <- vif(model_2014)[1]
 vif_2018 <- vif(model_2018)[1]
 vif_2022 <- vif(model_2022)[1]
 
-#Création d'un tableau récapitulatif des résultats des tests
-tests <- data.frame(Model = c("1994", "1998", "2002", "2006", "2010", "2014", "2018", "2022"),
-                      BP_p_value = round(c(bp_1994$p.value, bp_1998$p.value, bp_2002$p.value, bp_2006$p.value, bp_2010$p.value, bp_2014$p.value, bp_2018$p.value, bp_2022$p.value), 4),
-                      DW_p_value = round(c(dw_1994, dw_1998, dw_2002, dw_2006, dw_2010, dw_2014, dw_2018, dw_2022), 4),
-                      VIF_Value = round(c(vif_1994, vif_1998, vif_2002, vif_2006, vif_2010, vif_2014, vif_2018, vif_2022), 4))
+#Tableau récapitulatif des tests
+tests <- data.frame(Model      = c("1994", "1998", "2002", "2006", "2010", "2014", "2018", "2022"),
+                    BP_p_value = round(c(bp_1994$p.value, bp_1998$p.value, bp_2002$p.value,
+                                         bp_2006$p.value, bp_2010$p.value, bp_2014$p.value,
+                                         bp_2018$p.value, bp_2022$p.value), 4),
+                    DW_p_value = round(c(dw_1994, dw_1998, dw_2002,
+                                         dw_2006, dw_2010, dw_2014,
+                                         dw_2018, dw_2022), 4),
+                    VIF_Value  = round(c(vif_1994, vif_1998, vif_2002,
+                                         vif_2006, vif_2010, vif_2014,
+                                         vif_2018, vif_2022), 4))
 tests
 ```
 
@@ -487,8 +474,10 @@ tests
 
 Pour ces 4 Coupes du Monde, les statistiques disponibles sont plus nombreuses.
 ```{r}
-#Stargazer les 3 modèles, on arrondit les coefficients à 3 chiffres après la virgule et on renomme les modèles en 1994, 1998 et 2002. On utilise pas renamer = FALSE car cela ne fonctionne pas avec stargazer.
-stargazer(model_1994, model_1998, model_2002, type = "text", digits = 3, title = "Modèle de régression linéaire pour la Coupe du Monde 1994, 1998 et 2002", 
+stargazer(model_1994, model_1998, model_2002,
+          type = "text",
+          digits = 3,
+          title = "Modèle de régression linéaire pour la Coupe du Monde 1994, 1998 et 2002", 
           column.labels = c("1994", "1998", "2002"))
 
 stargazer(model_2006, model_2010, model_2014, model_2018, model_2022,
@@ -499,23 +488,24 @@ stargazer(model_2006, model_2010, model_2014, model_2018, model_2022,
           column.labels = c("2006", "2010", "2014", "2018", "2022"))
 ```
 
-Sur le premier groupe — Coupes du Monde 1994, 1998 et 2002 — le seul coefficient significatif est celui associé à la variable de différence de classement FIFA. Le coefficient significatif négatif indique que les équipes ayant un meilleur classement FIFA ont tendances à marquer plus que les autres. De plus, la variable de différence de carton rouge est significative et négative pour l'année 2002. Ainsi et toutes choses égales par ailleurs, un carton rouge est associé à une diminution du nombre de buts marqué. Cela peut suggérer que les équipes qui reçoivent plus de cartons rouges ont plus de difficulté à maintenir leur stratégie de jeu, ce qui peut affaiblir leur performance sur le terrain et leur capacité à marquer.
+Dans le groupe des Coupes du Monde de 1994, 1998 et 2002, le seul coefficient significatif est celui lié à la variable de différence de classement FIFA. Le coefficient négatif significatif indique que les équipes ayant un classement FIFA plus élevé ont tendance à marquer plus de buts que les autres équipes. De plus, la variable de différence de carton rouge est significative et négative pour l'année 2002. Cela implique qu'un carton rouge est associé à une diminution du nombre de buts marqués, toutes choses étant égales par ailleurs. Cela peut suggérer que les équipes qui reçoivent plus de cartons rouges ont du mal à maintenir leur stratégie de jeu, ce qui peut affaiblir leur performance sur le terrain et leur capacité à marquer.
   
-Contrairement à la conclusion de Saumik Paul and Ronita Mitra, le coefficient associé à la variable d'affluence ne peut pas être interprété. En effet, il n'est pas significatif au seuil de 5% et est très proche de 0. De même pour le coefficient associé à la variable de différence de carton jaune, il n'est pas significatif et ne peut donc pas être interpréter.
+Contrairement à la conclusion de Saumik Paul et Ronita Mitra, le coefficient associé à la variable d'affluence ne peut pas être interprété, car il n'est pas significatif au seuil de 5% et est très proche de 0. De même, le coefficient associé à la variable de différence de carton jaune n'est pas significatif et ne peut donc pas être interprété.
   
-De manière plus générale, on voit que le coefficient de détermination $R²$ est en moyenne de 0.2 sur nos 3 modèles. Ainsi, seulement 20% de la variation de la différence de buts est en moyenne expliquée par le modèle, permettant de conclure qu'il n'est pas correctement estimé.
+De manière plus générale, on constate que le coefficient de détermination $R²$ est en moyenne de 0.2 sur nos 3 modèles. Cela signifie que seulement 20% de la variation de la différence de buts est expliquée en moyenne par le modèle, permettant de conclure qu'il n'est pas correctement estimé.
   
   
-Sur le deuxième groupe — Coupes du Monde 2006, 2010, 2014, 2018 et 2022 — il y beaucoup plus de variables significatives. Le classement FIFA n'est plus significatif pour toutes les éditions de la Coupe du Monde. Cela peut être dû à l'ajout des variables de contrôle qui capturent des aspects importants des performances des équipes qui sont liés au classement FIFA, mais qui ne sont pas directement mesurés par celui-ci.
-On voit que la variable de possession de balle ainsi que celle des cartons jaunes n'est pas significative. Cela indique que le fait de garder plus la balle ou d'être plus agressif n'a pas d'impact sur la différence de but finale.
+Dans le deuxième groupe, qui concerne les Coupes du Monde de 2006, 2010, 2014, 2018 et 2022, il y a beaucoup plus de variables significatives même si le classement FIFA n'est désormais plus significatif pour toutes les éditions de la Coupe du Monde. Cela peut être dû à l'ajout de variables de contrôle qui capturent des aspects importants des performances des équipes liés au classement FIFA mais qui ne sont pas mesurés directement par celui-ci.
+
+On observe que les variables de possession de balle ainsi que celles des cartons jaunes ne sont pas significatives. Cela indique que le fait de garder davantage la balle ou d'être plus agressif n'a pas d'impact sur la différence de but finale.
   
-Les variables de tirs cadrés et d'arrêts sont, elles, significatives et positives au seuil de 5% pour chaque édition de la Coupe du Monde. Les équipes qui ont plus de tirs cadrés ont tendance à marquer plus de buts. Cela est logique et suggère que  les équipes qui ont un jeu plus précis et qui ciblent mieux le but adverse ont une plus grande probabilité de réussir leurs attaques, ce qui vient contraster la non-significativité du coefficient associé à la variable tir. Ce n'est en effet pas parce qu'une équipe tir plus au but, qu'elle augmentera sa probabilité de marquer, au sens de notre modèle. La variable de différence d'arrêt donne la réflexion inverse de la variable tir, plus l'équipe aura un bon gardien et une défense solide, moins elle aura de chance de concéder un but.
+En revanche, les variables de tirs cadrés et d'arrêts sont significatives et positives au seuil de 5% pour chaque édition de la Coupe du Monde. Les équipes qui ont plus de tirs cadrés ont tendance à marquer plus de buts. Cela vient contraster avec la non-significativité du coefficient associé à la variable tir. En effet, le simple fait de tirer plus au but n'augmente pas nécessairement la probabilité de marquer selon notre modèle. La variable de différence d'arrêt donne la réflexion inverse de la variable tir : plus une équipe a un bon gardien et une défense solide, moins elle a de chance de concéder un but.
   
-Contrairement au premier modèle, on peut considérer celui-ci comme correctement estimé. En effet, le $R²$ est en moyenne de 0.63, montrant que le modèle explique en moyenne 62% de la variance de la différence de buts. Pour l'édition 2018, le modèle explique même jusqu'à 90% de cette variation.
+Le modèle appliqué au deuxième groupe de Coupe du Monde se démarque par sa fiabilité, en contraste avec celui appliqué au premier groupe. En effet, le coefficient de détermination $R²$ présente une moyenne de 0,63, ce qui révèle que le modèle peut expliquer en moyenne 62% de la variation de la différence de buts. Il est à noter que pour l'édition 2018, le modèle peut expliquer jusqu'à 90% de cette variation, témoignant ainsi de la pertinence de ses prévisions.
 
 # 5. Modèle probit
 
-A la différence du modèle MCO, le modeèle probit cherche à prédire une variable binaire. Les variables explicatives sont des variables continues mais la variable expliquée prend oui/non comme valeur.
+A la différence du modèle MCO, le modèle probit cherche à prédire une variable binaire. Les variables explicatives sont des variables continues mais la variable expliquée prend oui/non comme valeur.
 
 \begin{equation}
 Win_{t}^{i} = \alpha_{t} + \beta_{1,t} \cdot Rank_{t}^{i} + \beta_{2,t} \cdot X_{t}^{i} + \epsilon_{t}^{i}
@@ -534,44 +524,44 @@ Le modèle peut se réécrire comme suit :
 
 $$ P(Win_{t}^{i}=1 | Rank_{t}^{i},X_{t}^{i}) = \Phi(\alpha + \beta_1 Rank_{t}^{i} + \beta_2 X_{t}^{i} + \epsilon_{t}^{i}) $$
 
+où $\Phi$ représente la fonction de répartition cumulative de la distribution normale standard.
+
+On dit que la probabilité que l'équipe $i$ gagne le match de la Coupe du Monde $t$ étant donné son classement $Rank_{t}^{i}$ et les variables de contrôles $X_{t}^{i}$ est donnée par la fonction de répartition cumulative de la variable aléatoire normale standardisée $\alpha + \beta_1 Rank_{t}^{i} + \beta_2 X_{t}^{i} + \epsilon_{t}^{i}$. En d'autres termes, $\Phi$ calcule la probabilité que la variable aléatoire suit une distribution normale standard et prend une valeur inférieure ou égale à une certaine valeur donnée.
+
 ## 5.1 Nouveau dataframe
 
-A l'instar du modèle de régression linéaire précédent pour qui chaque match est une observation, le modèle probit considère lui un match comme 2 observations. En effet, pour chaque match il y a 2 équipes et chaque équipe à une probabilité de gagner qui est différente, ce qui implique de regarder chaque match du point de vue de l'équipe à domicile et de celui de l'équipe à l'extérieur.
+Contrairement au modèle de régression linéaire précédent où chaque match était considéré comme une seule observation, le modèle probit prend en compte deux observations pour chaque match. Par match, il y a deux équipes, chacune ayant une probabilité de gagner différente, ce qui nécessite d'examiner chaque match du point de vue de l'équipe à domicile et de celui de l'équipe à l'extérieur.
 
-Nous avons donc fait un nouveau dataframe qui empille les données, ne regardant plus chaque équipe comme à domicile ou à l'extérieur, mais comme "gagne ou ne gagne pas". Cette nouvelle variable représentera notre dummy.
+Nous avons donc fait un nouveau dataframe qui empile les données, ne regardant plus chaque équipe comme à domicile ou à l'extérieur, mais comme "gagne ou ne gagne pas". Cette nouvelle variable représentera notre dummy.
 
 ```{r}
-# Créer un dataframe vide pour stocker les données transformées
 WC_Probit <- data.frame()
 
-# Boucle pour chaque ligne de données
 for (i in 1:nrow(WC_database)) {
-  
-  # Extraire les informations sur l'équipe à domicile
-  home_team <- WC_database[i, "Home"]
-  home_goals <- WC_database[i, "Home.Goals"]
-  home_red_cards <- WC_database[i, "Home.Red.Card.Count"]
-  home_yellow_cards <- WC_database[i, "Home.Yellow.Card.Count"]
-  home_substitutions <- WC_database[i, "Home.Substitution.Count"]
-  home_possession <- WC_database[i, "hPossesion"]
+  #Equipe à domicile
+  home_team            <- WC_database[i, "Home"]
+  home_goals           <- WC_database[i, "Home.Goals"]
+  home_red_cards       <- WC_database[i, "Home.Red.Card.Count"]
+  home_yellow_cards    <- WC_database[i, "Home.Yellow.Card.Count"]
+  home_substitutions   <- WC_database[i, "Home.Substitution.Count"]
+  home_possession      <- WC_database[i, "hPossesion"]
   home_shots_on_target <- WC_database[i, "hshotsOnTarget"]
-  home_shots <- WC_database[i, "hshots"]
-  home_fouls <- WC_database[i, "hfouls"]
-  home_saves <- WC_database[i, "hsaves"]
+  home_shots           <- WC_database[i, "hshots"]
+  home_fouls           <- WC_database[i, "hfouls"]
+  home_saves           <- WC_database[i, "hsaves"]
+
+  #Equipe à l'extérieur
+  away_team             <- WC_database[i, "Away"]
+  away_goals            <- WC_database[i, "Away.Goals"]
+  away_red_cards        <- WC_database[i, "Away.Red.Card.Count"]
+  away_yellow_cards     <- WC_database[i, "Away.Yellow.Card.Count"]
+  away_substitutions    <- WC_database[i, "Away.Substitution.Count"]
+  away_possession       <- WC_database[i, "aPossesion"]
+  away_shots_on_target  <- WC_database[i, "ashotsOnTarget"]
+  away_shots            <- WC_database[i, "ashots"]
+  away_fouls            <- WC_database[i, "afouls"]
+  away_saves            <- WC_database[i, "asaves"]
   
-  # Extraire les informations sur l'équipe à l'extérieur
-  away_team <- WC_database[i, "Away"]
-  away_goals <- WC_database[i, "Away.Goals"]
-  away_red_cards <- WC_database[i, "Away.Red.Card.Count"]
-  away_yellow_cards <- WC_database[i, "Away.Yellow.Card.Count"]
-  away_substitutions <- WC_database[i, "Away.Substitution.Count"]
-  away_possession <- WC_database[i, "aPossesion"]
-  away_shots_on_target <- WC_database[i, "ashotsOnTarget"]
-  away_shots <- WC_database[i, "ashots"]
-  away_fouls <- WC_database[i, "afouls"]
-  away_saves <- WC_database[i, "asaves"]
-  
-  # Créer une observation pour l'équipe à domicile
   home_observation <- data.frame(Team = home_team,
                                  Goals = home_goals,
                                  Red_Cards = home_red_cards,
@@ -586,7 +576,6 @@ for (i in 1:nrow(WC_database)) {
                                  Year = WC_database[i, "Year"],
                                  Round = WC_database[i, "Round"])
   
-  # Créer une observation pour l'équipe à l'extérieur
   away_observation <- data.frame(Team = away_team,
                                  Goals = away_goals,
                                  Red_Cards = away_red_cards,
@@ -601,11 +590,13 @@ for (i in 1:nrow(WC_database)) {
                                  Year = WC_database[i, "Year"],
                                  Round = WC_database[i, "Round"])
   
-  # Ajouter les observations au dataframe transformé
   WC_Probit <- rbind(WC_Probit, home_observation, away_observation)
 }
 
-WC_Probit <- merge(WC_Probit, FIFA_rank, by.x = c("Team", "Year"), by.y = c("country_full", "Year"), all.x = TRUE)
+WC_Probit <- merge(WC_Probit, FIFA_rank,
+                   by.x = c("Team", "Year"),
+                   by.y = c("country_full", "Year"),
+                   all.x = TRUE)
 WC_Probit <- WC_Probit[,-c(15:20)]
 
 ```
@@ -617,32 +608,29 @@ WC_Probit <- WC_Probit[,-c(15:20)]
 Les données disponibles pour ces 3 éditions de Coupe du monde sont limitées, nous estimons donc les 3 modèle à part.
 
 ```{r}
-
-#On fait notre regression logistique pour la coupe du monde 1994
-#Cela correspond à Win = Rank + Goal + Yellow + Red
-model_probit_1994 <- glm(Win ~ rank + Goals + Yellow_Cards + Red_Cards, data = WC_Probit[WC_Probit$Year == 1994,], family = binomial(link = "logit"))
+#CDM 1994
+model_probit_1994 <- glm(Win ~ rank + Goals + Yellow_Cards + Red_Cards,
+                               data = WC_Probit[WC_Probit$Year == 1994,],
+                               family = binomial(link = "logit"))
 
 #CDM 1998
-model_probit_1998 <- glm(Win ~ rank + Goals + Yellow_Cards + Red_Cards, data = WC_Probit[WC_Probit$Year == 1998,], family = binomial(link = "logit"))
+model_probit_1998 <- glm(Win ~ rank + Goals + Yellow_Cards + Red_Cards,
+                               data = WC_Probit[WC_Probit$Year == 1998,],
+                               family = binomial(link = "logit"))
 
 #CDM 2002
-model_probit_2002 <- glm(Win ~ rank + Goals + Yellow_Cards + Red_Cards, data = WC_Probit[WC_Probit$Year == 2002,], family = binomial(link = "logit"))
+model_probit_2002 <- glm(Win ~ rank + Goals + Yellow_Cards + Red_Cards,
+                               data = WC_Probit[WC_Probit$Year == 2002,],
+                               family = binomial(link = "logit"))
 ```
 
 ### 5.2.2 Modèle probit pour 2006, 2010, 2014, 2018 et 2022
 
 ```{r}
-#Pour les prochaines CDM, on ajoute les variables de contrôle
-#CDM 2006
-model_probit_2006 <- glm(Win ~ rank +
-                               Goals +
-                               Yellow_Cards +
-                               Red_Cards +
-                               Substitutions +
-                               Possession  +
-                               Shots +
-                               Shots_On_Target +
-                               Fouls +
+model_probit_2006 <- glm(Win ~ rank + Goals + Yellow_Cards  +
+                               Red_Cards    + Substitutions +
+                               Possession   + Shots         +
+                               Shots_On_Target + Fouls      +
                                Saves,
                                na.action = na.exclude,
                                data = WC_Probit[WC_Probit$Year == 2006,],
@@ -650,60 +638,40 @@ model_probit_2006 <- glm(Win ~ rank +
 
 
 #CDM 2010
-model_probit_2010 <- glm(Win ~ rank +
-                               Goals +
-                               Yellow_Cards +
-                               Red_Cards +
-                               Substitutions +
-                               Possession  +
-                               Shots +
-                               Shots_On_Target +
-                               Fouls +
+model_probit_2010 <- glm(Win ~ rank + Goals + Yellow_Cards  +
+                               Red_Cards    + Substitutions +
+                               Possession   + Shots         +
+                               Shots_On_Target + Fouls      +
                                Saves,
                                na.action = na.exclude,
                                data = WC_Probit[WC_Probit$Year == 2010,],
                                family = binomial(link = "logit"))
 
 #CDM 2014
-model_probit_2014 <- glm(Win ~ rank +
-                               Goals +
-                               Yellow_Cards +
-                               Red_Cards +
-                               Substitutions +
-                               Possession  +
-                               Shots +
-                               Shots_On_Target +
-                               Fouls +
+model_probit_2014 <- glm(Win ~ rank + Goals + Yellow_Cards  +
+                               Red_Cards    + Substitutions +
+                               Possession   + Shots         +
+                               Shots_On_Target + Fouls      +
                                Saves,
                                na.action = na.exclude,
                                data = WC_Probit[WC_Probit$Year == 2014,],
                                family = binomial(link = "logit"))
 
 #CDM 2018
-model_probit_2018 <- glm(Win ~ rank +
-                               Goals +
-                               Yellow_Cards +
-                               Red_Cards +
-                               Substitutions +
-                               Possession  +
-                               Shots +
-                               Shots_On_Target +
-                               Fouls +
+model_probit_2018 <- glm(Win ~ rank + Goals + Yellow_Cards  +
+                               Red_Cards    + Substitutions +
+                               Possession   + Shots         +
+                               Shots_On_Target + Fouls      +
                                Saves,
                                na.action = na.exclude,
                                data = WC_Probit[WC_Probit$Year == 2018,],
                                family = binomial(link = "logit"))
 
 #CDM 2022
-model_probit_2022 <- glm(Win ~ rank +
-                               Goals +
-                               Yellow_Cards +
-                               Red_Cards +
-                               Substitutions +
-                               Possession  +
-                               Shots +
-                               Shots_On_Target +
-                               Fouls,
+model_probit_2022 <- glm(Win ~ rank + Goals + Yellow_Cards  +
+                               Red_Cards    + Substitutions +
+                               Possession   + Shots         +
+                               Shots_On_Target + Fouls,
                                na.action = na.exclude,
                                data = WC_Probit[WC_Probit$Year == 2022,],
                                family = binomial(link = "logit"))
@@ -712,33 +680,30 @@ model_probit_2022 <- glm(Win ~ rank +
 ## 5.3 Résultats
 
 ```{r}
-#Stargazer pour afficher les résultats, en spécifiant l'édition de la coupe du monde dans le nom de la colonne
 stargazer(model_probit_1994, model_probit_1998, model_probit_2002,
           type = "text",
           title = "Probit model for the World Cup 1994, 1998 and 2002",
           column.labels = c("1994", "1998", "2002"),
           dep.var.labels = "Win")
 
-#Stargazer pour afficher les résultats en spécifiant l'édition de la coupe du monde dans le nom de la colonne
 stargazer(model_probit_2006, model_probit_2010, model_probit_2014,
           type = "text",
           title = "Probit model for the World Cup 2006, 2010, 2014",
           column.labels = c("2006", "2010", "2014", "2018", "2022"),
           dep.var.labels = "Win")
 
-#Pareil pour 2018 et 2022
 stargazer(model_probit_2018, model_probit_2022,
           type = "text",
           title = "Probit model for the World Cup 2018 and 2022",
           column.labels = c("2018", "2022"),
           dep.var.labels = "Win")
 ```
-Pour tous les modèles, le coefficient associé à la variable de buts marqués est positif et significatif. Cela est évident puisque le fait de marquer plus de buts augmente les chances de gagner.
+Le coefficient relatif à la variable du nombre de buts marqués est systématiquement positif et significatif dans tous les modèles. En effet, cela semble logique car marquer des buts accroît les chances de gagner.
+Quant au coefficient associé aux variables cartons jaunes et rouges, il ne présente pas toujours une significativité statistique et son signe varie selon les éditions de la Coupe du Monde. Lorsqu'il est positif, cela indique que le fait de recevoir un carton jaune ou rouge peut accroître la probabilité de remporter le match, tandis qu'un coefficient négatif indique une diminution de cette probabilité. L'alternance de signe de ce coefficient révèle que le style de jeu défensif efficace (agressif ou plutôt passif) varie selon les éditions de la compétition.
 
-On observe que le coefficient associé aux variables cartons jaunes et cartons rouges n'est pas toujours significatifs. De plus, selon les éditions, il est parfois négatif parfois positif. Lorsque ce coefficient est positif, cela indique que recevoir un carton jaune ou rouge augmenterai la probabilité de gagner le match, et inversement, lorsqu'il est négatif cela indique une baisse de la probabilité de gagner le match. L'hétérogénéité du signe de ce coefficient montre que le style de jeu défensif payant (aggresif ou plutôt passif) varie selon les éditions de la Coupe du Monde.
+L'absence de signification du classement FIFA indique que cette mesure n'est guère un indicateur fiable des résultats d'un match de la Coupe du Monde. En effet, le classement FIFA est établi en utilisant une méthode discrète qui tient compte des performances passées de l'équipe. Toutefois, cette approche peut ne pas rendre compte avec exactitude de la qualité actuelle de l'équipe ou de son aptitude à gagner des matches dans le cadre particulier de la Coupe du Monde, qui diffère de toute autre phase éliminatoire ou compétition.
 
-Le fait que le classement FIFA ne soit que rarement significatif montre que ce classement n'est pas un bon prédicteur fiable des résultats d'un match de Coupe du Monde. En effet, le classement FIFA est calculé de manière discrète, en utilisant une formule qui prend en compte les résultats des matches précédents la Coupe du Monde. Cela peut ne pas refléter avec précision la qualité actuelle de l'équipe ou sa capacité à gagner des matches dans une situation de Coupe du Monde particulière, qui est bien différente des différentes phases éliminatoires et autres compétitions.
-
-Les coefficients du nombre de tirs et de tirs cadrés ne sont significatifs que lors de l'édition de 2014. Cela peut être surprenant, car on pourrait penser que les équipes qui tirent plus souvent et plus précisément ont une meilleure chance de marquer des buts et donc de gagner le match. Cependant, il y a plusieurs raisons pour lesquelles ces variables peuvent ne pas être significatives dans les modèles. Tout d'abord, la précision et le nombre de tirs ne sont que des indicateurs de la performance offensive, et il est possible que d'autres facteurs, tels que la performance défensive, soient plus importants pour la victoire. En outre, la qualité des tirs (par exemple, le lieu, le moment et le contexte du tir) peut être un facteur important qui n'est pas pris en compte dans ce modèle.
+Quant aux coefficients relatifs aux tirs et tirs cadrés, ils ne sont significatifs qu'au cours de l'édition de 2014. Cette situation peut paraître surprenante, car l'on pourrait supposer que les équipes qui tirent le plus souvent et le plus précisément ont une plus grande probabilité de marquer des buts et, partant, de remporter la victoire. Cependant, il existe plusieurs raisons pour lesquelles ces variables peuvent ne pas être significatives dans les modèles. Tout d'abord, la précision et le nombre de tirs ne sont que des indicateurs de la performance offensive, tandis que d'autres facteurs tels que la performance défensive peuvent s'avérer plus importants pour la victoire. En outre, la qualité des tirs, comme leur lieu, leur moment et leur contexte, peut influer sur le résultat et n'est pas prise en compte dans ce modèle.
 
 # 6. Conclusion
+
