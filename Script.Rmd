@@ -28,11 +28,11 @@ library(margins)
 
 ## 1.1 Ce que dit l'article
 
-Cet article examine la prévisibilité des résultats de la Coupe du monde de football en utilisant deux modèles empiriques. Depuis 1993, le système de classement mensuel (couramment appelé coefficient des pays) de la FIFA pour les équipes nationales de football seniors est devenu une source fiable pour juger du potentiel d'une équipe dans la compétition. Cependant, l'article montre que, malgré le nombre de surprises dans les résultats des matchs, les équipes les mieux classées ont généralement de meilleures performances. Les auteurs analysent les résultats des quatre Coupes du monde de la FIFA de 1994 à 2006 et utilisent les classements mensuels de la FIFA pour évaluer les performances des équipes. Deux modèles empiriques sont proposés : un modèle probit et un modèle de régression linéaire MCO. Le premier modèle évalue la probabilité de victoire pour chaque équipe en fonction de son classement FIFA, tandis que le second modèle utilise la différence de buts comme variable dépendante pour voir si les équipes les mieux classées ont généralement des performances supérieures. Les auteurs trouvent des preuves empiriques que, malgré les surprises occasionnelles, les équipes les mieux classées ont généralement de meilleures performances.
+Cet article examine la prévisibilité des résultats de la Coupe du monde de football en utilisant deux modèles empiriques. Depuis 1993, le système de classement mensuel (couramment appelé coefficient des pays) de la FIFA pour les équipes nationales de football seniors est devenu une source fiable pour juger du potentiel d'une équipe dans la compétition. Cependant, l'article montre que, malgré le nombre de surprises dans les résultats des matchs, les équipes les mieux classées ont généralement de meilleures performances. Les auteurs analysent les résultats des quatre Coupes du monde de la FIFA de 1994 à 2006 et utilisent les classements mensuels de la FIFA pour évaluer les performances des équipes. Deux modèles empiriques sont proposés : un modèle de régression linéaire et un modèle probit. Le premier modèle utilise la différence de buts comme variable expliquée pour voir si les équipes les mieux classées ont généralement des meilleures performances, tandis que le second évalue la probabilité de victoire pour chaque équipe en fonction de son classement FIFA et ainsi que d'autres variables de contrôles. Les auteurs trouvent des preuves empiriques que, malgré les surprises occasionnelles, les équipes les mieux classées ont généralement de meilleures performances.
 
 ## 1.2 Ce qu'on cherche à faire
 
-L'objectif de cette étude est de répliquer les résultats de l'article en utilisant en utiisant les mêmes données que les auteurs, ainsi que d'autres plus récentes. Bien que le modèle probit et le modèle de régression linéaire MCO proposés dans l'article soient reproductibles, certaines variables de contrôle utilisées par les auteurs ne sont pas disponibles pour la période de 206 à 2022. Ainsi, nous avons remplacé ces variables par d'autres indicateurs pertinents, tels que le nombre de changement effectué par chaque équipe, le nombre de tirs en plus du nombre de tirs cadrés, ainsi que le nombre d'arrêts. En utilisant ces variables alternatives, nous examinons si les conclusions de l'article original peuvent être étendues à une période plus récente de la Coupe du monde de football. Nous testons également la validité de la méthode de classement de la FIFA et de son utilisation comme proxy pour la performance des équipes.
+L'objectif de cette étude est de répliquer les résultats de l'article en utilisant les mêmes données que les auteurs, ainsi que d'autres plus récentes. Bien que le modèle probit et le modèle MCO proposés dans l'article soient reproductibles, certaines variables de contrôle utilisées par les auteurs ne sont pas disponibles pour la période de 2006 à 2022 — C'est le cas du nombre de corners ainsi que du nombre d'arrêt pour 2022. Nous avons ainsi remplacé ces variables par d'autres indicateurs pertinents tout en y ajoutant des nouveaux, tels que le nombre de changement effectué par chaque équipe, le nombre de tirs en plus du nombre de tirs cadrés, ainsi que le nombre d'arrêts. En utilisant ces variables alternatives, nous examinons si les conclusions de l'article original peuvent être étendues à une période plus récente de la Coupe du monde de football. Nous testons également la validité de la méthode de classement de la FIFA et de son utilisation comme proxy pour la performance des équipes.
 
 # 2. Traitement des données
 
@@ -65,33 +65,17 @@ WC_matches <- read.csv("WC Data/matches_1930_2022 (All).csv",
                     sep = ",",
                     stringsAsFactors = FALSE)
 
-WC_matches <- WC_matches[c("home_team",
-                           "away_team",
-                           "home_score",
-                           "away_score",
-                           "Attendance",
-                           "Round",
-                           "Year",
-                           "home_red_card",
-                           "away_red_card",
-                           "home_yellow_card_long",
-                           "away_yellow_card_long",
-                           "home_substitute_in_long",
-                           "away_substitute_in_long")]
+WC_matches <- WC_matches[c("home_team", "away_team", "home_score",
+                           "away_score", "Attendance", "Round",
+                           "Year", "home_red_card", "away_red_card",
+                           "home_yellow_card_long", "away_yellow_card_long",
+                           "home_substitute_in_long", "away_substitute_in_long")]
 
 #On renomme les colonnes
-colnames(WC_matches) <- c("Home",
-                          "Away",
-                          "Home.Goals",
-                          "Away.Goals",
-                          "Attendance",
-                          "Round",
-                          "Year",
-                          "Home.Red.Card",
-                          "Away.Red.Card",
-                          "Home.Yellow.Card",
-                          "Away.Yellow.Card",
-                          "Home.Substitute.In",
+colnames(WC_matches) <- c("Home", "Away", "Home.Goals", "Away.Goals",
+                          "Attendance", "Round", "Year", "Home.Red.Card",
+                          "Away.Red.Card", "Home.Yellow.Card",
+                          "Away.Yellow.Card", "Home.Substitute.In",
                           "Away.Substitute.In")
 
 #On ajoute une colonne de différence de buts
