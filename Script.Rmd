@@ -9,6 +9,7 @@ output:
     toc_float: true
     df_print: paged
     code_folding: hide
+    theme: flatly
 ---
 
 ```{r setup, include=FALSE}
