@@ -1,5 +1,5 @@
 ---
-title: "FIFA WC outcomes prediction"
+title: "How predictable are the FIFA World Cup outcomes? An empirical analysis"
 author: "Thomas Fernandes"
 date: "2023-04-12"
 output:
@@ -181,7 +181,6 @@ names(WC_matches_2022)[names(WC_matches_2022) == "fouls.against.team1"] <- "foul
 names(WC_matches_2022)[names(WC_matches_2022) == "fouls.against.team2"] <- "fouls.team2"
 WC_matches_2022$Fouls.Diff <- WC_matches_2022$fouls.team1 - WC_matches_2022$fouls.team2
 
-
 #Suppression des colonnes inutiles
 WC_matches_2022_22 <- subset(WC_matches_2022, select = c(1:7, 11, 12, 21, 22, 57:62, 89:96))
 
@@ -306,7 +305,7 @@ for (i in 1:nrow(WC_database)) {
 WC_database$FIFA_Rank.Diff <- WC_database$FIFA_Rank.Home - WC_database$FIFA_Rank.Away
 ```
 
-## 2.5 Création d'une dataframe par coupe du monde
+## 2.5 Création d'un dataframe par coupe du monde
 
 ```{r}
 #On crée une dataframe par coupe du monde
@@ -339,7 +338,7 @@ plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
                 name = "Buts") %>%
       layout(title = "Moyenne de buts par match",
                 xaxis = list(title = "Année"),
-                yaxis = list(title = "Goals", range = c(0, 2)))
+                yaxis = list(title = "Nombre de buts", range = c(0, 2)))
 ```
 
 ```{r}
@@ -365,49 +364,83 @@ plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
                 name = "Moyenne de tirs cadrés") %>%
       layout(title = "Moyenne de buts et de tirs cadrés par match",
                 xaxis = list(title = "Année"),
-                yaxis = list(title = "Buts et tirs cadrés", range = c(0, 8)))
+                yaxis = list(title = "Nombre de buts et tirs cadrés", range = c(0, 8)))
 ```
 
 Nous constatons une stabilité de la moyenne de buts marqués au fil des différentes éditions de la Coupe du Monde. Par ailleurs, nous remarquons que la moyenne de buts marqués à domicile est légèrement supérieure à celle à l'extérieur, bien que le choix de l'équipe à domicile et à l'extérieur soit déterminé par un tirage au sort.
 
-## 3.2 Moyenne de carton jaune et rouge par match
+## 3.2 Moyenne de cartons jaunes et rouges par match
 
 ```{r}
 plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
-                y = c(mean(WC_1994$Home.Yellow.Card.Count), mean(WC_1998$Home.Yellow.Card.Count),
-                      mean(WC_2002$Home.Yellow.Card.Count), mean(WC_2006$Home.Yellow.Card.Count),
-                      mean(WC_2010$Home.Yellow.Card.Count), mean(WC_2014$Home.Yellow.Card.Count),
-                      mean(WC_2018$Home.Yellow.Card.Count), mean(WC_2022$Home.Yellow.Card.Count)),
-                type = "bar",
-                name = "Home Yellow Cards") %>%
-      add_trace(y = c(mean(WC_1994$Away.Yellow.Card.Count), mean(WC_1998$Away.Yellow.Card.Count), mean(WC_2002$Away.Yellow.Card.Count), mean(WC_2006$Away.Yellow.Card.Count), mean(WC_2010$Away.Yellow.Card.Count), mean(WC_2014$Away.Yellow.Card.Count), mean(WC_2018$Away.Yellow.Card.Count), mean(WC_2022$Away.Yellow.Card.Count)),
-                name = "Away Yellow Cards") %>%
-      layout(title = "Moyenne de carton jaune par match",
-                xaxis = list(title = "Year"),
-                yaxis = list(title = "Yellow Cards"))
+                y = c(mean(c(WC_1994$Home.Yellow.Card.Count, WC_1994$Away.Yellow.Card.Count)),
+                      mean(c(WC_1998$Home.Yellow.Card.Count, WC_1998$Away.Yellow.Card.Count)),
+                      mean(c(WC_2002$Home.Yellow.Card.Count, WC_2002$Away.Yellow.Card.Count)),
+                      mean(c(WC_2006$Home.Yellow.Card.Count, WC_2006$Away.Yellow.Card.Count)),
+                      mean(c(WC_2010$Home.Yellow.Card.Count, WC_2010$Away.Yellow.Card.Count)),
+                      mean(c(WC_2014$Home.Yellow.Card.Count, WC_2014$Away.Yellow.Card.Count)),
+                      mean(c(WC_2018$Home.Yellow.Card.Count, WC_2018$Away.Yellow.Card.Count)),
+                      mean(c(WC_2022$Home.Yellow.Card.Count, WC_2022$Away.Yellow.Card.Count))),
+                type = "scatter",
+                mode = "lines",
+                name = "Moyenne de cartons jaunes") %>%
+      layout(title = "Moyenne de cartons jaunes par match",
+                xaxis = list(title = "Année"),
+                yaxis = list(title = "Nombre de cartons jaunes"))
 ```
 
 ```{r}
 plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
-                y = c(mean(WC_1994$Home.Red.Card.Count), mean(WC_1998$Home.Red.Card.Count),
-                      mean(WC_2002$Home.Red.Card.Count), mean(WC_2006$Home.Red.Card.Count),
-                      mean(WC_2010$Home.Red.Card.Count), mean(WC_2014$Home.Red.Card.Count),
-                      mean(WC_2018$Home.Red.Card.Count), mean(WC_2022$Home.Red.Card.Count)),
-                type = "bar",
-                name = "Home Red Cards") %>%
-      add_trace(y = c(mean(WC_1994$Away.Red.Card.Count), mean(WC_1998$Away.Red.Card.Count),
-                      mean(WC_2002$Away.Red.Card.Count), mean(WC_2006$Away.Red.Card.Count),
-                      mean(WC_2010$Away.Red.Card.Count), mean(WC_2014$Away.Red.Card.Count),
-                      mean(WC_2018$Away.Red.Card.Count), mean(WC_2022$Away.Red.Card.Count)),
-                name = "Away Red Cards") %>%
+                y = c(mean(c(WC_1994$Home.Red.Card.Count, WC_1994$Away.Red.Card.Count)),
+                      mean(c(WC_1998$Home.Red.Card.Count, WC_1998$Away.Red.Card.Count)),
+                      mean(c(WC_2002$Home.Red.Card.Count, WC_2002$Away.Red.Card.Count)),
+                      mean(c(WC_2006$Home.Red.Card.Count, WC_2006$Away.Red.Card.Count)),
+                      mean(c(WC_2010$Home.Red.Card.Count, WC_2010$Away.Red.Card.Count)),
+                      mean(c(WC_2014$Home.Red.Card.Count, WC_2014$Away.Red.Card.Count)),
+                      mean(c(WC_2018$Home.Red.Card.Count, WC_2018$Away.Red.Card.Count)),
+                      mean(c(WC_2022$Home.Red.Card.Count, WC_2022$Away.Red.Card.Count))),
+                type = "scatter",
+                mode = "lines",
+                name = "Red Cards") %>%
       layout(title = "Moyenne de carton rouge par match",
-                xaxis = list(title = "Year"),
-                yaxis = list(title = "Red Cards"))
+                xaxis = list(title = "Année"),
+                yaxis = list(title = "Cartons rouges"))
+
+```
+
+```{r}
+plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
+                y = c(mean(c(WC_1994$Home.Yellow.Card.Count, WC_1994$Away.Yellow.Card.Count)),
+                      mean(c(WC_1998$Home.Yellow.Card.Count, WC_1998$Away.Yellow.Card.Count)),
+                      mean(c(WC_2002$Home.Yellow.Card.Count, WC_2002$Away.Yellow.Card.Count)),
+                      mean(c(WC_2006$Home.Yellow.Card.Count, WC_2006$Away.Yellow.Card.Count)),
+                      mean(c(WC_2010$Home.Yellow.Card.Count, WC_2010$Away.Yellow.Card.Count)),
+                      mean(c(WC_2014$Home.Yellow.Card.Count, WC_2014$Away.Yellow.Card.Count)),
+                      mean(c(WC_2018$Home.Yellow.Card.Count, WC_2018$Away.Yellow.Card.Count)),
+                      mean(c(WC_2022$Home.Yellow.Card.Count, WC_2022$Away.Yellow.Card.Count))),
+                type = "scatter",
+                mode = "lines",
+                name = "Cartons jaunes") %>%
+      add_trace(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
+                y = c(mean(c(WC_1994$Home.Red.Card.Count, WC_1994$Away.Red.Card.Count)),
+                      mean(c(WC_1998$Home.Red.Card.Count, WC_1998$Away.Red.Card.Count)),
+                      mean(c(WC_2002$Home.Red.Card.Count, WC_2002$Away.Red.Card.Count)),
+                      mean(c(WC_2006$Home.Red.Card.Count, WC_2006$Away.Red.Card.Count)),
+                      mean(c(WC_2010$Home.Red.Card.Count, WC_2010$Away.Red.Card.Count)),
+                      mean(c(WC_2014$Home.Red.Card.Count, WC_2014$Away.Red.Card.Count)),
+                      mean(c(WC_2018$Home.Red.Card.Count, WC_2018$Away.Red.Card.Count)),
+                      mean(c(WC_2022$Home.Red.Card.Count, WC_2022$Away.Red.Card.Count))),
+                type = "scatter",
+                mode = "lines",
+                name = "Cartons rouges") %>%
+      layout(title = "Moyenne de cartons par match",
+                xaxis = list(title = "Année"),
+                yaxis = list(title = "Nombre de cartons"))
 ```
 
 Nous pouvons observer une diminution du nombre de cartons jaunes et rouges par match au fil des années de la Coupe du Monde. Cette tendance peut être expliquée par une possible évolution dans la sévérité des arbitres, qui pourraient être de moins en moins stricts dans leur distribution de cartons, ou par une amélioration du comportement disciplinaire des joueurs, notamment depuis l'introduction de la VAR qui permet de mieux contrôler les fautes commises.
 
-# 4.Modèle de régression linéaire
+# 4. Modèle de régression linéaire
 
 Le modèle de regression linéaire suivant est estimé pour chaque année de la Coupe du Monde :
 
