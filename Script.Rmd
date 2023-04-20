@@ -47,13 +47,15 @@ __Applied Economics Letters__, 2008, 15, 1171–1176, *Saumik Paul and Ronita Mi
 
 <p class="justify">L'objectif de cette étude est de répliquer les résultats de l'article en utilisant les mêmes données que les auteurs, ainsi que des données plus récentes. Cependant, certaines variables de contrôle utilisées dans l'article original ne sont pas disponibles pour la période de 2006 à 2022, telles que le nombre de corners et le nombre d'arrêts pour 2022. Ainsi, afin de pallier à cette lacune, nous avons sélectionné d'autres indicateurs pertinents pour les remplacer, tout en ajoutant de nouveaux, tels que le nombre de changements effectués par chaque équipe, le nombre total de tirs en plus du nombre de tirs cadrés, ainsi que le nombre d'arrêts. En utilisant ces variables alternatives, nous avons cherché à savoir si les conclusions de l'article original pouvaient être étendues à une période plus récente de la Coupe du monde de football. Nous avons également mis à l'épreuve la validité de la méthode de classement de la FIFA et de son utilisation en tant que proxy pour la performance des équipes.</p>
 
+Nos variables : Buts, classement FIFA, Cartons jaunes, rouges, fautes, tirs, tirs cadrés, arrêts, possession de balle, affluence.
+
 # 2. Traitement des données
 
 <p class="justify">Les données liées aux coupes du monde n'étant officiellement plus disponible gratuitement sur le site de la FIFA, il faut se baser sur des données d'utilisateurs qui ont scrap le site de la FIFA dans l'objectif de répliquer ces bases de données.
 
 - Matchs : https://www.kaggle.com/datasets/piterfm/fifa-football-world-cup — *Petro Ivaniuk*. Statistiques de base (buts, affluence, cartons) sur tous les matchs de Coupe du Monde depuis la première édition en 1930.
       
-- Matchs_stats: https://www.kaggle.com/datasets/kaito510/fifa-world-cup-match-stats — *Kaito G.*. Statistiques complémentaires sur les match internationaux de 2001 à 2021. Contient les variables de contrôle de possession de balle, de tirs et tirs cadrés, des arrêts ainsi que des fautes.
+- Matchs_stats: https://www.kaggle.com/datasets/kaito510/fifa-world-cup-match-stats — *Kaito G.*. Statistiques complémentaires sur les matchs internationaux de 2001 à 2021. Contient les variables de contrôle de possession de balle, de tirs et tirs cadrés, des arrêts ainsi que des fautes.
 
 - Coupe du monde 2022 : https://www.kaggle.com/datasets/die9origephit/fifa-world-cup-2022-complete-dataset — *Diego Farchione*. Base de données complète de la Coupe du Monde 2022.
 
@@ -460,7 +462,7 @@ Le modèle de régression linéaire suivant est estimé pour chaque année de la
 
 \[\Delta \text{Buts}_t^i = \beta_0 + \beta_1 \Delta \text{Rank}_t^i + \beta_2 \Delta \text{X}_t^i + \beta_3 \text{Attendence}_t^i + \varepsilon_t^i\]
 
-<p class="justify">avec le match i, de l'année de coupe du monde t, et $\Delta \text{X}_t^i$ le vecteur des variables de contrôles. Le contenu du vecteur $X$ varie selon les années en fonction des données disponibles. À partir de 2006, les variables de contrôle comprennent la différence du nombre de cartons jaunes, rouges, de fautes, de possession, de tirs et de tirs cadrés. Dans certaines années, la différence du nombre d'arrêts est également incluse.</p>
+<p class="justify">avec le match i, de l'année de coupe du monde t, et $\Delta \text{X}_t^i$ le vecteur des variables de contrôles. Le contenu du vecteur $X$ varie selon les années en fonction des données disponibles. À partir de 2006, les variables de contrôle comprennent la différence du nombre de cartons jaunes, rouges, de fautes, de possession, de tirs et de tirs cadrés. Pour certaines années, la différence du nombre d'arrêts est également incluse.</p>
 
 ## 4.1 Estimations des modèles des modèles
 
