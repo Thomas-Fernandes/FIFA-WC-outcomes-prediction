@@ -9,7 +9,14 @@ output:
     toc_float: true
     df_print: paged
     theme: flatly
+    css: styles.css
 ---
+
+<style>
+.justify {
+  text-align: justify;
+}
+</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -27,33 +34,34 @@ library(margins)
 library(sandwich)
 ```
 
+
 # 1. Introduction
+
+__Applied Economics Letters__, 2008, 15, 1171–1176, *Saumik Paul and Ronita Mitra*
 
 ## 1.1 Ce que dit l'article
 
-Cet article examine la prévisibilité des résultats de la Coupe du monde de football en utilisant deux modèles empiriques. Depuis 1993, le système de classement mensuel de la FIFA (couramment appelé coefficient des pays) pour les équipes nationales de football seniors est devenu une source fiable pour juger du potentiel d'une équipe dans la compétition. Cependant, l'article montre que, malgré le nombre de surprises dans les résultats des matchs, les équipes les mieux classées ont généralement de meilleures performances. Les auteurs analysent les résultats des quatre Coupes du monde de la FIFA de 1994 à 2006 et utilisent les classements mensuels de la FIFA pour évaluer les performances des équipes. Deux modèles empiriques sont proposés : un modèle de régression linéaire et un modèle probit. Le premier modèle utilise la différence de buts comme variable expliquée pour voir si les équipes les mieux classées ont généralement des meilleures performances, tandis que le second évalue la probabilité de victoire pour chaque équipe en fonction de son classement FIFA et ainsi que d'autres variables de contrôles. Les auteurs trouvent des preuves empiriques que, malgré les surprises occasionnelles, les équipes les mieux classées ont généralement de meilleures performances.
+<p class="justify">Cet article examine la prévisibilité des résultats de la Coupe du monde de football en utilisant deux modèles empiriques. Depuis 1993, le système de classement mensuel de la FIFA (couramment appelé coefficient des pays) pour les équipes nationales de football seniors est devenu une source fiable pour juger du potentiel d'une équipe dans la compétition. Cependant, l'article montre que, malgré le nombre de surprises dans les résultats des matchs, les équipes les mieux classées ont généralement de meilleures performances. Les auteurs analysent les résultats des quatre Coupes du monde de la FIFA de 1994 à 2006 et utilisent les classements mensuels de la FIFA pour évaluer les performances des équipes. Deux modèles empiriques sont proposés : un modèle de régression linéaire et un modèle probit. Le premier modèle utilise la différence de buts comme variable expliquée pour voir si les équipes les mieux classées ont généralement des meilleures performances, tandis que le second évalue la probabilité de victoire pour chaque équipe en fonction de son classement FIFA et ainsi que d'autres variables de contrôles. Les auteurs trouvent des preuves empiriques que, malgré les surprises occasionnelles, les équipes les mieux classées ont généralement de meilleures performances.</p>
 
 ## 1.2 Ce qu'on cherche à faire
 
-L'objectif de cette étude est de répliquer les résultats de l'article en utilisant les mêmes données que les auteurs, ainsi que des données plus récentes. Cependant, certaines variables de contrôle utilisées dans l'article original ne sont pas disponibles pour la période de 2006 à 2022, telles que le nombre de corners et le nombre d'arrêts pour 2022.Ainsi, afin de pallier à cette lacune, nous avons sélectionné d'autres indicateurs pertinents pour les remplacer, tout en ajoutant de nouveaux, tels que le nombre de changements effectués par chaque équipe, le nombre total de tirs en plus du nombre de tirs cadrés, ainsi que le nombre d'arrêts. En utilisant ces variables alternatives, nous avons cherché à savoir si les conclusions de l'article original pouvaient être étendues à une période plus récente de la Coupe du monde de football. Nous avons également mis à l'épreuve la validité de la méthode de classement de la FIFA et de son utilisation en tant que proxy pour la performance des équipes.
+<p class="justify">L'objectif de cette étude est de répliquer les résultats de l'article en utilisant les mêmes données que les auteurs, ainsi que des données plus récentes. Cependant, certaines variables de contrôle utilisées dans l'article original ne sont pas disponibles pour la période de 2006 à 2022, telles que le nombre de corners et le nombre d'arrêts pour 2022. Ainsi, afin de pallier à cette lacune, nous avons sélectionné d'autres indicateurs pertinents pour les remplacer, tout en ajoutant de nouveaux, tels que le nombre de changements effectués par chaque équipe, le nombre total de tirs en plus du nombre de tirs cadrés, ainsi que le nombre d'arrêts. En utilisant ces variables alternatives, nous avons cherché à savoir si les conclusions de l'article original pouvaient être étendues à une période plus récente de la Coupe du monde de football. Nous avons également mis à l'épreuve la validité de la méthode de classement de la FIFA et de son utilisation en tant que proxy pour la performance des équipes.</p>
 
 # 2. Traitement des données
 
-Les données liées aux coupes du monde n'étant officiellement plus disponible gratuitement sur le site de la FIFA, il faut se baser sur des données d'utilisateurs qui ont scrap le site de la FIFA dans l'objectif de répliquer ces bases de données.
+<p class="justify">Les données liées aux coupes du monde n'étant officiellement plus disponible gratuitement sur le site de la FIFA, il faut se baser sur des données d'utilisateurs qui ont scrap le site de la FIFA dans l'objectif de répliquer ces bases de données.
 
-Classement FIFA : https://www.kaggle.com/datasets/cashncarry/fifaworldranking — Alex Zabrodin
-                  Ces données comprennent le classement fifa de 1992 (date de création) à nos jours
-
-Coupe du monde 2022 : https://www.kaggle.com/datasets/die9origephit/fifa-world-cup-2022-complete-dataset — Diego Farchione
-                      Database complète de toutes les statistiques de chaque match de la coupe du monde 2022
-         
-Matchs : https://www.kaggle.com/datasets/piterfm/fifa-football-world-cup — Petro Ivaniuk
-      Base de données complète reprenant les contenant le score de tous les matchs de coupe du monde (1930-2022), les cartons (jaunes et rouges) et l'affluence
+- Matchs : https://www.kaggle.com/datasets/piterfm/fifa-football-world-cup — *Petro Ivaniuk*. Statistiques de base (buts, affluence, cartons) sur tous les matchs de Coupe du Monde depuis la première édition en 1930.
       
-Matchs_stats: https://www.kaggle.com/datasets/kaito510/fifa-world-cup-match-stats — Kaito G.
-      Contient les données de possession de balle, carton, tir cadrés de 2001 à 2021
+- Matchs_stats: https://www.kaggle.com/datasets/kaito510/fifa-world-cup-match-stats — *Kaito G.*. Statistiques complémentaires sur les match internationaux de 2001 à 2021. Contient les variables de contrôle de possession de balle, de tirs et tirs cadrés, des arrêts ainsi que des fautes.
+
+- Coupe du monde 2022 : https://www.kaggle.com/datasets/die9origephit/fifa-world-cup-2022-complete-dataset — *Diego Farchione*. Base de données complète de la Coupe du Monde 2022.
+
+- Classement FIFA : https://www.kaggle.com/datasets/cashncarry/fifaworldranking — *Alex Zabrodin*. Classement FIFA depuis son introduction en 1994 jusqu'à aujourd'hui.</p>
 
 ## 2.1 Traitement des données de match
+
+<p class="justify">Les statistiques liées à un match sont enregistrées ranger en chaîne de caractères. Pour intégrer ces données à notre modèle, nous avons dû les convertir en variables numériques. Nous avons utilisé la fonction sapply() pour appliquer la fonction strsplit() à chaque élément de la liste des données. Cette fonction strsplit() permet de diviser les éléments des chaînes de caractères selon un séparateur prédéfini.</p>
 
 ```{r}
 WC_matches <- read.csv("WC Data/matches_1930_2022 (All).csv",
@@ -76,14 +84,20 @@ colnames(WC_matches) <- c("Home", "Away", "Home.Goals", "Away.Goals",
 
 #On extrait les variables de contrôles des string, et on créé les variables en différence
 WC_matches$Goals_Diff             <- WC_matches$Home.Goals - WC_matches$Away.Goals
-WC_matches$Home.Red.Card.Count    <- sapply(strsplit(WC_matches$Home.Red.Card, "\\|"), function(x) length(x))
-WC_matches$Away.Red.Card.Count    <- sapply(strsplit(WC_matches$Away.Red.Card, "\\|"), function(x) length(x))
+WC_matches$Home.Red.Card.Count    <- sapply(strsplit(WC_matches$Home.Red.Card, "\\|"),
+                                            function(x) length(x))
+WC_matches$Away.Red.Card.Count    <- sapply(strsplit(WC_matches$Away.Red.Card, "\\|"),
+                                            function(x) length(x))
 WC_matches$Red.Card.Diff          <- WC_matches$Home.Red.Card.Count - WC_matches$Away.Red.Card.Count
-WC_matches$Home.Yellow.Card.Count <- sapply(strsplit(WC_matches$Home.Yellow.Card, ","), function(x) length(x))
-WC_matches$Away.Yellow.Card.Count <- sapply(strsplit(WC_matches$Away.Yellow.Card, ","), function(x) length(x))
+WC_matches$Home.Yellow.Card.Count <- sapply(strsplit(WC_matches$Home.Yellow.Card, ","),
+                                            function(x) length(x))
+WC_matches$Away.Yellow.Card.Count <- sapply(strsplit(WC_matches$Away.Yellow.Card, ","),
+                                            function(x) length(x))
 WC_matches$Yellow.Card.Diff       <- WC_matches$Home.Yellow.Card.Count - WC_matches$Away.Yellow.Card.Count
-WC_matches$Home.Substitution.Count<- sapply(strsplit(WC_matches$Home.Substitute.In, ","), function(x) length(x))
-WC_matches$Away.Substitution.Count<- sapply(strsplit(WC_matches$Away.Substitute.In, ","), function(x) length(x))
+WC_matches$Home.Substitution.Count<- sapply(strsplit(WC_matches$Home.Substitute.In, ","),
+                                            function(x) length(x))
+WC_matches$Away.Substitution.Count<- sapply(strsplit(WC_matches$Away.Substitute.In, ","),
+                                            function(x) length(x))
 WC_matches$Substitution.Diff      <- WC_matches$Home.Substitution.Count - WC_matches$Away.Substitution.Count
 
 WC_database <- WC_matches
@@ -95,7 +109,7 @@ WC_database <- WC_database[,-c(8,9,10,11,12, 13)]
 
 ## 2.2 Traitement des données de match supplémentaires
 
-Pour les matchs les plus récents (à partir de la Coupe du Monde 2014), nous avons des données supplémentaires sur la possession de balle, le nombre de tir, de tir cadré, de fautes et d'arrêt : nos variables de contrôle.
+<p class="justify">Nous disposons de données supplémentaires pour les matchs les plus récents, à partir de la Coupe du Monde 2006, qui incluent la possession de balle, le nombre de tirs, de tirs cadrés, de fautes et d'arrêts. Ces données sont considérées comme des variables de contrôle pour notre modèle.</p>
 
 ```{r}
 WC_matches_stats <- read.csv("WC Data/FIFAallMatchBoxData (Possesion 2001-2021).csv",
@@ -151,7 +165,7 @@ WC_database <- subset(WC_database, select = -c(hgoals, agoals, hyellowCards,
 
 ## 2.3 Traitement des données de la coupe du monde 2022
 
-Les données de la dernière coupe du monde ne sont pas incluses dans les base de données précédemment utilisées. On va donc se servir d'une nouvelle base de données et la mettre au même format que WC_database pour pouvoir ensuite faire une jointure sur les deux.
+<p class="justify">Les données relatives à la dernière Coupe du monde ne sont pas intégrées dans les bases de données précédemment utilisées. Pour résoudre ce problème, nous allons utiliser une nouvelle base de données et la structurer de la même manière que WC_database. Cette manipulation nous permettra ensuite d'effectuer une jointure entre les deux bases. On privilégiera une boucle for plutôt que la fonction merge() pour limiter les erreurs. Cela correspond à un LEFT JOIN.</p>
 
 ```{r}
 WC_matches_2022 <- read.csv("WC Data/Fifa_world_cup_matches_2022 (Cards).csv",
@@ -208,8 +222,6 @@ names(WC_matches_2022_22)[names(WC_matches_2022_22) == "fouls.team2"]           
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "possession.team1"]      <- "hPossession"
 names(WC_matches_2022_22)[names(WC_matches_2022_22) == "possession.team2"]      <- "aPossession"
 
-#On va maintenant cherche à faire une base de données avec les données de la Coupe du Monde 2022 et les données de la base de données WC_database
-
 # remplacer les valeurs manquantes dans WC_database avec les valeurs correspondantes dans WC_matches_2022_22
 WC_database$Home <- tolower(trimws(WC_database$Home))
 WC_database$Away <- tolower(trimws(WC_database$Away))
@@ -218,8 +230,6 @@ WC_database$Year <- as.integer(WC_database$Year)
 WC_matches_2022_22$Home <- tolower(trimws(WC_matches_2022_22$Home))
 WC_matches_2022_22$Away <- tolower(trimws(WC_matches_2022_22$Away))
 WC_matches_2022_22$Year <- as.integer(WC_matches_2022_22$Year)
-
-
 
 for (i in 1:nrow(WC_database)) {
   if (is.na(WC_database$hshots[i]) && WC_database$Year[i] == 2022) {
@@ -254,8 +264,9 @@ WC_database$Home.Win <- ifelse(WC_database$Goals_Diff > 0, 1, 0)
 
 ```
 
-
 ## 2.4 Traitement du classement FIFA
+
+<p class="justify">Afin d'ajouter le classement FIFA de l'année t pour chaque équipe i dans notre modèle, une fonction 'get_rank(year, team)' a été créée pour récupérer le classement FIFA correspondant.</p>
 
 ```{r}
 FIFA_rank <- read.csv("WC Data/fifa_ranking-2022-12-22 (Rank).csv",
@@ -307,8 +318,9 @@ WC_database$FIFA_Rank.Diff <- WC_database$FIFA_Rank.Home - WC_database$FIFA_Rank
 
 ## 2.5 Création d'un dataframe par coupe du monde
 
+<p class="justify">Afin de faciliter les estimations futures, le dataframe a été divisé en plusieurs dataframes distincts, chacun correspondant à une édition de la Coupe du Monde.</p>
+
 ```{r}
-#On crée une dataframe par coupe du monde
 WC_1994 <- subset(WC_database, Year == 1994)
 WC_1998 <- subset(WC_database, Year == 1998)
 WC_2002 <- subset(WC_database, Year == 2002)
@@ -320,6 +332,8 @@ WC_2022 <- subset(WC_database, Year == 2022)
 ```
 
 # 3. Statistiques descriptives
+
+<p class="justify">Les statistiques descriptives sont utilisées pour mieux appréhender les caractéristiques des données et ainsi pouvoir prendre des décisions analytiques plus éclairées pots estimation.</p>
 
 ## 3.1 Moyenne de buts par match
 
@@ -341,7 +355,7 @@ plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
                 yaxis = list(title = "Nombre de buts", range = c(0, 2)))
 ```
 
-```{r}
+```{r, warning = FALSE}
 plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
                 y = c(mean(c(WC_1994$Home.Goals, WC_1994$Away.Goals)),
                       mean(c(WC_1998$Home.Goals, WC_1998$Away.Goals)),
@@ -367,7 +381,7 @@ plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
                 yaxis = list(title = "Nombre de buts et tirs cadrés", range = c(0, 8)))
 ```
 
-Nous constatons une stabilité de la moyenne de buts marqués au fil des différentes éditions de la Coupe du Monde. Par ailleurs, nous remarquons que la moyenne de buts marqués à domicile est légèrement supérieure à celle à l'extérieur, bien que le choix de l'équipe à domicile et à l'extérieur soit déterminé par un tirage au sort.
+<p class="justify">La moyenne de buts marqués demeure stable à travers les diverses éditions de la Coupe du Monde. Bien que certaines éditions enregistrent un grand nombre de tirs cadrés, la moyenne de buts ne semble pas augmenter.</p>
 
 ## 3.2 Moyenne de cartons jaunes et rouges par match
 
@@ -438,19 +452,19 @@ plotly::plot_ly(x = c(1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022),
                 yaxis = list(title = "Nombre de cartons"))
 ```
 
-Nous pouvons observer une diminution du nombre de cartons jaunes et rouges par match au fil des années de la Coupe du Monde. Cette tendance peut être expliquée par une possible évolution dans la sévérité des arbitres, qui pourraient être de moins en moins stricts dans leur distribution de cartons, ou par une amélioration du comportement disciplinaire des joueurs, notamment depuis l'introduction de la VAR qui permet de mieux contrôler les fautes commises.
+<p class="justify">Nous pouvons observer une diminution du nombre de cartons jaunes et rouges par match au fil des années de la Coupe du Monde. Cette tendance peut être expliquée par une possible évolution dans la sévérité des arbitres, qui pourraient être de moins en moins stricts dans leur distribution de cartons, ou par une amélioration du comportement disciplinaire des joueurs, notamment depuis l'introduction de la VAR qui permet de mieux contrôler les fautes commises.</p>
 
 # 4. Modèle de régression linéaire
 
-Le modèle de regression linéaire suivant est estimé pour chaque année de la Coupe du Monde :
+Le modèle de régression linéaire suivant est estimé pour chaque année de la Coupe du Monde :
 
-\[\Delta \text{Buts}_t^i = \beta_0 + \beta_1 \Delta \text{Rank}_t^i + \beta_2 \Delta \text{X}_t^i + \beta_3 \Delta \text{Attendence}_t^i + \varepsilon_t^i\]
+\[\Delta \text{Buts}_t^i = \beta_0 + \beta_1 \Delta \text{Rank}_t^i + \beta_2 \Delta \text{X}_t^i + \beta_3 \text{Attendence}_t^i + \varepsilon_t^i\]
 
-avec le match i, de l'année de coupe du monde t, et $\Delta \text{X}_t^i$ le vecteur des variables de contrôles. Le vecteur X contient, selon les années, plus ou moins de variables de contrôle en fonction des données qui disponibles. Cependant à partir de 2006, les variables de contrôle sont : La différence du nombre de carton jaune, rouge, du nombre de fautes, de possession, du nombre de tirs et de tirs cadrés. Pour certaines années, la différence du nombre d'arrêt est incluse.
+<p class="justify">avec le match i, de l'année de coupe du monde t, et $\Delta \text{X}_t^i$ le vecteur des variables de contrôles. Le contenu du vecteur $X$ varie selon les années en fonction des données disponibles. À partir de 2006, les variables de contrôle comprennent la différence du nombre de cartons jaunes, rouges, de fautes, de possession, de tirs et de tirs cadrés. Dans certaines années, la différence du nombre d'arrêts est également incluse.</p>
 
 ## 4.1 Estimations des modèles des modèles
 
-On divise les différentes Coupes du Monde en deux sous ensemble : 1994, 1998 et 2002, et 2006, 2010, 2014, 2018 et 2022. La répartition permet de regroupés les modèles pour lesquels nous avons peu de variables de contrôle de ceux pour lesquels nous en avons plusieurs.
+<p class="justify">On divise les différentes Coupes du Monde en deux sous ensemble : 1994, 1998 et 2002, et 2006, 2010, 2014, 2018 et 2022. La répartition permet de regroupés les modèles pour lesquels nous avons peu de variables de contrôle de ceux pour lesquels nous en avons plusieurs.</p>
 
 ```{r}
 #Groupe 1
@@ -490,10 +504,10 @@ model_2022 <- lm(Goals_Diff ~ FIFA_Rank.Diff + Yellow.Card.Diff + Red.Card.Diff 
 
 ## 4.2 Tests d'hétéroscédasticité et de multicolinéarité
 
-On soupçonne de la multicolinéarité au sein des variables de contrôle pusique certaines sont corrélées entre elles (Nombre de tir et nombre de tir cadrés par exemple). On utilise le test VIF pour cela. On test par la même occasion l'hétéroscédasticité des résidus, pour être sur que les hypothèses de base de la régression linéaire sont respectées (Constance de la variance des résidus)
+<p class="justify">Il est suspecté qu'il y ait une multicolinéarité au sein des variables de contrôle car certaines d'entre elles sont corrélées entre elles (par exemple, le nombre de tirs et le nombre de tirs cadrés). Le test VIF est utilisé pour examiner cela. En même temps, on teste l'hétéroscédasticité des résidus pour s'assurer que les hypothèses fondamentales de la régression linéaire sont respectées, en particulier la constance de la variance des résidus.</p>
 
 ```{r}
-#Test de White avec bptest (hétéroscédasticité)
+#Test de White (hétéroscédasticité)
 bp_1994 <- bptest(model_1994, ~ FIFA_Rank.Diff + Yellow.Card.Diff +
                                 Red.Card.Diff  + Attendance +
                                 I(FIFA_Rank.Diff^2) + I(Yellow.Card.Diff^2) +
@@ -573,17 +587,13 @@ tests <- data.frame(Model      = c("1994", "1998", "2002", "2006", "2010", "2014
 tests
 ```
 
-On constate que les valeurs des VIF sont inférieures à 10, ce qui signifie que les variables ne sont pas corrélées entre elles. Pour les années 2014 à 2022, on constate que les p.value du test de White sont inférieurs à 0.05, ce qui signifie que les résidus ne sont pas homoscédastiques. Pour les années 1994 à 2002, on constate que les p.value du test de White sont supérieurs à 0.05, ce qui signifie que les résidus sont homoscédastiques. Pour les années 1994 à 2002, on constate que les p.value du test de Durbin-Watson sont supérieurs à 0.05, ce qui signifie que les résidus sont indépendants. Pour les années 2006 à 2022, on constate que les p.value du test de Durbin-Watson sont inférieurs à 0.05, ce qui signifie que les résidus ne sont pas indépendants.
-
-On va chercher à corriger cette hétéroscédasticité en utilisant la méthode de White.
+<p class="justify">Les résultats révèlent que les valeurs de VIF sont inférieures à 10, suggérant que les variables ne présentent pas de corrélation. Pour la période de 2014 à 2022, les p-values du test de White sont inférieures à 0,05, indiquant ainsi que les résidus ne suivent pas une distribution homoscédastique. Toutefois, pour la période de 1994 à 2002, les p-values du test de White sont supérieures à 0,05, ce qui suggère que les résidus sont homoscédastiques. Afin de corriger cette hétéroscédasticité, nous allons utiliser la méthode de White.</p>
 
 ```{r}
-# Correction de l'hétéroscédasticité
 model_2022_corrige <- coeftest(model_2022, vcov = vcovHC(model_2022, type = "HC1"))
 model_2018_corrige <- coeftest(model_2018, vcov = vcovHC(model_2018, type = "HC1"))
 model_2014_corrige <- coeftest(model_2014, vcov = vcovHC(model_2014, type = "HC1"))
 
-#Stargazer pour vérifier les résultats avec le modèle corrigé et non corrigé
 stargazer(model_2022, model_2022_corrige, type = "text", digits = 3,
           title = "Modèle de régression linéaire pour la Coupe du Monde 2022", 
           column.labels = c("Non corrigé", "Corrigé"))
@@ -598,9 +608,10 @@ stargazer(model_2014, model_2014_corrige, type = "text", digits = 3,
 
 ```
 
-## 4.2 Résultats
+L'hétéroscédasticité semble avoir été corrigée.
 
-Pour ces 4 Coupes du Monde, les statistiques disponibles sont plus nombreuses.
+## 4.3 Résultats
+
 ```{r}
 stargazer(model_1994, model_1998, model_2002,
           type = "text",
@@ -624,24 +635,25 @@ stargazer(model_2014_corrige, model_2018_corrige, model_2022_corrige,
           column.labels = c("2014", "2018", "2022"))
 ```
 
-Dans le groupe des Coupes du Monde de 1994, 1998 et 2002, le seul coefficient significatif est celui lié à la variable de différence de classement FIFA. Le coefficient négatif significatif indique que les équipes ayant un classement FIFA plus élevé ont tendance à marquer plus de buts que les autres équipes. De plus, la variable de différence de carton rouge est significative et négative pour l'année 2002. Cela implique qu'un carton rouge est associé à une diminution du nombre de buts marqués, toutes choses étant égales par ailleurs. Cela peut suggérer que les équipes qui reçoivent plus de cartons rouges ont du mal à maintenir leur stratégie de jeu, ce qui peut affaiblir leur performance sur le terrain et leur capacité à marquer.
+<p class="justify">Dans le groupe des Coupes du Monde de 1994, 1998 et 2002, le seul coefficient significatif pour tous les modèles est celui lié à la variable de différence de classement FIFA. Le coefficient négatif significatif indique que les équipes ayant un classement FIFA plus élevé ont tendance à marquer plus de buts que les autres équipes. De plus, la variable de différence de carton rouge est significative et négative pour l'année 2002. Cela implique qu'un carton rouge est associé à une diminution du nombre de buts marqués, toutes choses étant égales par ailleurs. Cela peut suggérer que les équipes qui reçoivent plus de cartons rouges ont du mal à maintenir leur stratégie de jeu, ce qui peut affaiblir leur performance sur le terrain et leur capacité à marquer.</p>
   
-Contrairement à la conclusion de Saumik Paul et Ronita Mitra, le coefficient associé à la variable d'affluence ne peut pas être interprété, car il n'est pas significatif au seuil de 5% et est très proche de 0. De même, le coefficient associé à la variable de différence de carton jaune n'est pas significatif et ne peut donc pas être interprété.
+<p class="justify">Contrairement à la conclusion de Saumik Paul et Ronita Mitra, le coefficient associé à la variable d'affluence ne peut pas être interprété, car il n'est pas significatif au seuil de 5% et est très proche de 0. De même, le coefficient associé à la variable de différence de carton jaune n'est pas significatif et ne peut donc pas être interprété.</p>
   
-De manière plus générale, on constate que le coefficient de détermination $R²$ est en moyenne de 0.2 sur nos 3 modèles. Cela signifie que seulement 20% de la variation de la différence de buts est expliquée en moyenne par le modèle, permettant de conclure qu'il n'est pas correctement estimé.
+<p class="justify">De manière plus générale, on constate que le coefficient de détermination $R²$ est en moyenne de 0.2 sur nos 3 modèles. Cela signifie que seulement 20% de la variation de la différence de buts est expliquée en moyenne par le modèle, permettant de conclure qu'il n'est pas correctement estimé.</p>
+<br>
+<br>
   
-  
-Dans le deuxième groupe, qui concerne les Coupes du Monde de 2006, 2010, 2014, 2018 et 2022, il y a beaucoup plus de variables significatives même si le classement FIFA n'est désormais plus significatif pour toutes les éditions de la Coupe du Monde. Cela peut être dû à l'ajout de variables de contrôle qui capturent des aspects importants des performances des équipes liés au classement FIFA mais qui ne sont pas mesurés directement par celui-ci.
+<p class="justify">Dans le deuxième groupe, qui concerne les Coupes du Monde de 2006, 2010, 2014, 2018 et 2022, il y a beaucoup plus de variables significatives même si le classement FIFA n'est désormais plus significatif pour toutes les éditions de la Coupe du Monde. Cela peut être dû à l'ajout de variables de contrôle qui capturent des aspects importants des performances des équipes liés au classement FIFA mais qui ne sont pas mesurés directement par celui-ci.</p>
 
-On observe que les variables de possession de balle ainsi que celles des cartons jaunes ne sont pas significatives. Cela indique que le fait de garder davantage la balle ou d'être plus agressif n'a pas d'impact sur la différence de but finale.
+<p class="justify">On observe que les variables de possession de balle ainsi que celles des cartons jaunes ne sont pas significatives. Cela indique que le fait de garder davantage la balle ou d'être plus agressif n'a pas d'impact sur la différence de but finale.</p>
   
-En revanche, les variables de tirs cadrés et d'arrêts sont significatives et positives au seuil de 5% pour chaque édition de la Coupe du Monde. Les équipes qui ont plus de tirs cadrés ont tendance à marquer plus de buts. Cela vient contraster avec la non-significativité du coefficient associé à la variable tir. En effet, le simple fait de tirer plus au but n'augmente pas nécessairement la probabilité de marquer selon notre modèle. La variable de différence d'arrêt donne la réflexion inverse de la variable tir : plus une équipe a un bon gardien et une défense solide, moins elle a de chance de concéder un but.
+<p class="justify">En revanche, les variables de tirs cadrés et d'arrêts sont significatives et positives au seuil de 5% pour chaque édition de la Coupe du Monde. Les équipes qui ont plus de tirs cadrés ont tendance à marquer plus de buts. Cela vient contraster avec la non-significativité du coefficient associé à la variable tir. En effet, le simple fait de tirer plus au but n'augmente pas nécessairement la probabilité de marquer selon notre modèle. La variable de différence d'arrêt donne la réflexion inverse de la variable tir : plus une équipe a un bon gardien et une défense solide, moins elle a de chance de concéder un but.</p>
   
-Le modèle appliqué au deuxième groupe de Coupe du Monde se démarque par sa fiabilité, en contraste avec celui appliqué au premier groupe. En effet, le coefficient de détermination $R²$ présente une moyenne de 0,63, ce qui révèle que le modèle peut expliquer en moyenne 62% de la variation de la différence de buts. Il est à noter que pour l'édition 2018, le modèle peut expliquer jusqu'à 90% de cette variation, témoignant ainsi de la pertinence de ses prévisions.
+<p class="justify">Le modèle appliqué au deuxième groupe de Coupe du Monde se démarque par sa fiabilité, en contraste avec celui appliqué au premier groupe. En effet, le coefficient de détermination $R²$ présente une moyenne de 0,63, ce qui révèle que le modèle peut expliquer en moyenne 62% de la variation de la différence de buts. Il est à noter que pour l'édition 2018, le modèle peut expliquer jusqu'à 90% de cette variation, témoignant ainsi de la pertinence de ses prévisions.</p>
 
 # 5. Modèle probit
 
-A la différence du modèle MCO, le modèle probit cherche à prédire une variable binaire. Les variables explicatives sont des variables continues mais la variable expliquée prend oui/non comme valeur.
+<p class="justify">A la différence du modèle MCO, le modèle probit cherche à prédire une variable binaire. Les variables explicatives sont des variables continues mais la variable expliquée prend oui/non comme valeur.</p>
 
 \begin{equation}
 Win_{t}^{i} = \alpha_{t} + \beta_{1,t} \cdot Rank_{t}^{i} + \beta_{2,t} \cdot X_{t}^{i} + \epsilon_{t}^{i}
@@ -660,15 +672,15 @@ Le modèle peut se réécrire comme suit :
 
 $$ P(Win_{t}^{i}=1 | Rank_{t}^{i},X_{t}^{i}) = \Phi(\alpha + \beta_1 Rank_{t}^{i} + \beta_2 X_{t}^{i} + \epsilon_{t}^{i}) $$
 
-où $\Phi$ représente la fonction de répartition cumulative de la distribution normale standard.
+où $\Phi$ représente la fonction de répartition cumulative de la distribution normale standard.<p class="justify">
 
-On dit que la probabilité que l'équipe $i$ gagne le match de la Coupe du Monde $t$ étant donné son classement $Rank_{t}^{i}$ et les variables de contrôles $X_{t}^{i}$ est donnée par la fonction de répartition cumulative de la variable aléatoire normale standardisée $\alpha + \beta_1 Rank_{t}^{i} + \beta_2 X_{t}^{i} + \epsilon_{t}^{i}$. En d'autres termes, $\Phi$ calcule la probabilité que la variable aléatoire suit une distribution normale standard et prend une valeur inférieure ou égale à une certaine valeur donnée.
+<p class="justify">On dit que la probabilité que l'équipe $i$ gagne le match de la Coupe du Monde $t$ étant donné son classement $Rank_{t}^{i}$ et les variables de contrôles $X_{t}^{i}$ est donnée par la fonction de répartition cumulative de la variable aléatoire normale standardisée $\alpha + \beta_1 Rank_{t}^{i} + \beta_2 X_{t}^{i} + \epsilon_{t}^{i}$. En d'autres termes, $\Phi$ calcule la probabilité que la variable aléatoire suit une distribution normale standard et prend une valeur inférieure ou égale à une certaine valeur donnée.</p>
 
 ## 5.1 Nouveau dataframe
 
-Contrairement au modèle de régression linéaire précédent où chaque match était considéré comme une seule observation, le modèle probit prend en compte deux observations pour chaque match. Par match, il y a deux équipes, chacune ayant une probabilité de gagner différente, ce qui nécessite d'examiner chaque match du point de vue de l'équipe à domicile et de celui de l'équipe à l'extérieur.
+<p class="justify">Contrairement au modèle de régression linéaire précédent où chaque match était considéré comme une seule observation, le modèle probit prend en compte deux observations pour chaque match. Par match, il y a deux équipes, chacune ayant une probabilité de gagner différente, ce qui nécessite d'examiner chaque match du point de vue de l'équipe à domicile et de celui de l'équipe à l'extérieur.</p>
 
-Nous avons donc fait un nouveau dataframe qui empile les données, ne regardant plus chaque équipe comme à domicile ou à l'extérieur, mais comme "gagne ou ne gagne pas". Cette nouvelle variable représentera notre dummy.
+<p class="justify">Nous avons donc fait un nouveau dataframe qui empile les données, ne regardant plus chaque équipe comme à domicile ou à l'extérieur, mais comme "gagne ou ne gagne pas". Cette nouvelle variable représentera notre dummy.</p>
 
 ```{r}
 WC_Probit <- data.frame()
@@ -740,7 +752,7 @@ WC_Probit <- WC_Probit[,-c(15:20)]
 
 ### 5.2.1 Modèle probit pour 1994, 1998 et 2002
 
-Les données disponibles pour ces 3 éditions de Coupe du monde sont limitées, nous estimons donc les 3 modèle à part.
+<p class="justify">Les données disponibles pour ces 3 éditions de Coupe du monde sont limitées, nous estimons donc les 3 modèle à part.</p>
 
 ```{r}
 #CDM 1994
@@ -833,12 +845,14 @@ stargazer(model_probit_2018, model_probit_2022,
           column.labels = c("2018", "2022"),
           dep.var.labels = "Win")
 ```
-Le coefficient relatif à la variable du nombre de buts marqués est systématiquement positif et significatif dans tous les modèles. En effet, cela semble logique car marquer des buts accroît les chances de gagner.
-Quant au coefficient associé aux variables cartons jaunes et rouges, il ne présente pas toujours une significativité statistique et son signe varie selon les éditions de la Coupe du Monde. Lorsqu'il est positif, cela indique que le fait de recevoir un carton jaune ou rouge peut accroître la probabilité de remporter le match, tandis qu'un coefficient négatif indique une diminution de cette probabilité. L'alternance de signe de ce coefficient révèle que le style de jeu défensif efficace (agressif ou plutôt passif) varie selon les éditions de la compétition.
 
-L'absence de signification du classement FIFA indique que cette mesure n'est guère un indicateur fiable des résultats d'un match de la Coupe du Monde. En effet, le classement FIFA est établi en utilisant une méthode discrète qui tient compte des performances passées de l'équipe. Toutefois, cette approche peut ne pas rendre compte avec exactitude de la qualité actuelle de l'équipe ou de son aptitude à gagner des matches dans le cadre particulier de la Coupe du Monde, qui diffère de toute autre phase éliminatoire ou compétition.
 
-Quant aux coefficients relatifs aux tirs et tirs cadrés, ils ne sont significatifs qu'au cours de l'édition de 2014. Cette situation peut paraître surprenante, car l'on pourrait supposer que les équipes qui tirent le plus souvent et le plus précisément ont une plus grande probabilité de marquer des buts et, partant, de remporter la victoire. Cependant, il existe plusieurs raisons pour lesquelles ces variables peuvent ne pas être significatives dans les modèles. Tout d'abord, la précision et le nombre de tirs ne sont que des indicateurs de la performance offensive, tandis que d'autres facteurs tels que la performance défensive peuvent s'avérer plus importants pour la victoire. En outre, la qualité des tirs, comme leur lieu, leur moment et leur contexte, peut influer sur le résultat et n'est pas prise en compte dans ce modèle.
+<p class="justify">Le coefficient relatif à la variable du nombre de buts marqués est systématiquement positif et significatif dans tous les modèles. En effet, cela semble logique car marquer des buts accroît les chances de gagner. Quant au coefficient associé aux variables cartons jaunes et rouges, il ne présente pas toujours une significativité statistique et son signe varie selon les éditions de la Coupe du Monde. Lorsqu'il est positif, cela indique que le fait de recevoir un carton jaune ou rouge peut accroître la probabilité de remporter le match, tandis qu'un coefficient négatif indique une diminution de cette probabilité. L'alternance de signe de ce coefficient révèle que le style de jeu défensif efficace (agressif ou plutôt passif) varie selon les éditions de la compétition.</p>
+
+<p class="justify">L'absence de signification du classement FIFA indique que cette mesure n'est guère un indicateur fiable des résultats d'un match de la Coupe du Monde. En effet, le classement FIFA est établi en utilisant une méthode discrète qui tient compte des performances passées de l'équipe. Toutefois, cette approche peut ne pas rendre compte avec exactitude de la qualité actuelle de l'équipe ou de son aptitude à gagner des matches dans le cadre particulier de la Coupe du Monde, qui diffère de toute autre phase éliminatoire ou compétition.</p>
+
+<p class="justify">Quant aux coefficients relatifs aux tirs et tirs cadrés, ils ne sont significatifs qu'au cours de l'édition de 2014. Cette situation peut paraître surprenante, car l'on pourrait supposer que les équipes qui tirent le plus souvent et le plus précisément ont une plus grande probabilité de marquer des buts et, partant, de remporter la victoire. Cependant, il existe plusieurs raisons pour lesquelles ces variables peuvent ne pas être significatives dans les modèles. Tout d'abord, la précision et le nombre de tirs ne sont que des indicateurs de la performance offensive, tandis que d'autres facteurs tels que la performance défensive peuvent s'avérer plus importants pour la victoire. En outre, la qualité des tirs, comme leur lieu, leur moment et leur contexte, peut influer sur le résultat et n'est pas prise en compte dans ce modèle.</p>
 
 # 6. Conclusion
 
+<p class="justify">Comme le soulignent les auteurs dans leur conclusion, l'utilisation du classement FIFA en tant qu'indicateur de performance d'une équipe est sujette à controverse. Bien que cet outil puisse être considéré comme pertinent pour certaines éditions de la Coupe du Monde, les événements imprévus peuvent toutefois remettre en question sa pertinence. La performance remarquable de la Russie, menée par le joueur talentueux Denis Cheryshev, qui a réussi à se hisser jusqu'en quart de finale lors de la Coupe du Monde 2018, ou encore la victoire de l'Arabie Saoudite contre l'Argentine, qui a finalement remporté le titre en 2022, illustrent ces surprises récurrentes. En somme, il est indéniable que ces résultats inattendus peuvent émerger à tout moment et qu'il est donc difficile de prédire avec précision les performances des équipes. Néanmoins, en dehors de ces événements imprévisibles, le classement FIFA demeure un indicateur relativement fiable sur le plan empirique.</p>
